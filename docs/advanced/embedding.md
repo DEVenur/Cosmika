@@ -29,6 +29,25 @@ await bot.add_cog(ChatCog(bot, discord_workflow, chat_system_prompt, runtime_con
 await bot.add_cog(AdminCog(bot, runtime_config))
 ```
 
+**`create_discord_workflow()`** returns the Agno `Workflow` that wires together the four pipeline steps (fetch history → call agent → render tables → send response). Call it once at startup and pass the result to `ChatCog`.
+
+**`RuntimeConfig(config_path)`** loads `config/runtime.yml` (created automatically on first write). It stores the allowed channel and user lists, timezone, history limit, and activity string. Pass the same instance to both `ChatCog` and `AdminCog` so admin commands take effect immediately.
+
+**`AdminCog`** adds the following slash commands (all require the **Administrator** server permission, all responses are ephemeral):
+
+| Command | Description |
+|---|---|
+| `/addchannel` | Allow the bot to respond to all messages in the current channel |
+| `/removechannel` | Remove the current channel from the allowed list |
+| `/listchannels` | Show all allowed channels |
+| `/adduser @user` | Allow a user to DM the bot |
+| `/removeuser @user` | Remove a user from the DM allowlist |
+| `/listusers` | Show all allowed DM users |
+| `/sethistorylimit <n>` | Number of past messages to include as context |
+| `/settimezone <tz>` | Timezone for timestamps in the system prompt |
+| `/setactivity <text>` | Bot's Discord activity status |
+| `/refreshmetadata` | Refresh stored display names for channels and users |
+
 ## `ChatCog` parameters
 
 | Parameter | Type | Description |
@@ -569,10 +588,10 @@ await bot.add_cog(ChatCog(
 Start the bot, then in each channel where you want natural-language responses, run:
 
 ```
-/allow
+/addchannel
 ```
 
-This is Dango's built-in admin command. It adds the current channel to the allowed list stored in `config/runtime.yml`.
+This is `AdminCog`'s built-in command. It adds the current channel to the allowed list stored in `config/runtime.yml`. The bot will now respond to all messages in that channel, not just @mentions.
 
 ### Result
 
