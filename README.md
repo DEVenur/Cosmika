@@ -64,20 +64,6 @@ uv run main.py
 
 ---
 
-## 嵌入你現有的 Bot
-
-整個 Agent 是標準 Cog，三行載入：
-
-```python
-from dango.commands import ChatCog, AdminCog
-await bot.add_cog(ChatCog(bot, create_discord_workflow(), system_prompt, runtime_config))
-await bot.add_cog(AdminCog(bot, runtime_config))
-```
-
-還可以把你 Bot 的指令包成 Agno tool，讓 AI 自己決定什麼時候呼叫。[完整教學 →](https://zhiro-labs.github.io/dango/advanced/embedding/)
-
----
-
 ## 文件
 
 **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)**
@@ -87,6 +73,7 @@ await bot.add_cog(AdminCog(bot, runtime_config))
 | [Discord 設定](https://zhiro-labs.github.io/dango/getting-started/discord-setup/) | [環境變數參考](https://zhiro-labs.github.io/dango/configuration/env-vars/) |
 | [Docker 安裝](https://zhiro-labs.github.io/dango/getting-started/docker/) | [Slash Commands](https://zhiro-labs.github.io/dango/usage/commands/) |
 | [模型 & 路由](https://zhiro-labs.github.io/dango/features/models/) | [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) |
+| [工具（搜尋 / API / SQL）](https://zhiro-labs.github.io/dango/features/tools/) | [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) |
 
 ---
 
