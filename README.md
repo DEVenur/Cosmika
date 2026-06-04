@@ -166,6 +166,12 @@ docker compose up -d && docker compose logs -f
 
 Head to `http://localhost:17860`. The Setup Wizard will ask for your Discord Token, model API key, and bot personality. Once you save, the bot connects to Discord automatically.
 
+> [!NOTE]
+> **Contributing or building from source?** Use `docker-compose.dev.yml` instead — it builds the image locally rather than pulling from the registry:
+> ```bash
+> docker compose -f docker-compose.dev.yml up -d --build
+> ```
+
 ---
 
 ### Option 3: uv (developers / low-spec machines)

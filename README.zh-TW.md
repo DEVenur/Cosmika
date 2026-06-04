@@ -166,6 +166,12 @@ docker compose up -d && docker compose logs -f
 
 前往 `http://localhost:17860`。設定精靈會引導你填入 Discord Token、模型 API Key 和 Bot 個性。儲存後 Bot 自動連線到 Discord。
 
+> [!NOTE]
+> **要貢獻或從原始碼建置？** 改用 `docker-compose.dev.yml`——它會在本機 build image 而不是從 registry pull：
+> ```bash
+> docker compose -f docker-compose.dev.yml up -d --build
+> ```
+
 ---
 
 ### 選項三：uv（開發者 / 低規格機器）
