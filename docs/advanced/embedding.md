@@ -17,9 +17,7 @@ pip install git+https://github.com/zhiro-labs/dango
 Set the required environment variables before importing (e.g. via `load_dotenv()`), then load the Cogs in `setup_hook`:
 
 ```python
-from dango.commands import ChatCog, AdminCog
-from dango.utils.runtime_config import RuntimeConfig
-from dango.workflow import create_discord_workflow
+from dango import ChatCog, AdminCog, create_discord_workflow, RuntimeConfig
 
 with open("config/chat_sys_prompt.txt", encoding="utf-8") as f:
     chat_system_prompt = f.read()
@@ -326,9 +324,7 @@ async def confirm_delete(channel_name: str, run_context: RunContext) -> str:
 Register right-click commands that route through the agent:
 
 ```python
-from dango.commands import ChatCog
-from dango.tools import ContextMenuDef
-from dango.workflow import create_discord_workflow
+from dango import ChatCog, ContextMenuDef, create_discord_workflow
 
 workflow = create_discord_workflow()
 
@@ -400,7 +396,7 @@ This file wraps each command's logic as an Agno tool. Neko's original slash comm
 ```python
 # neko_tools.py
 import discord
-from dango.tools import (
+from dango import (
     RunContext, discord_tool,
     get_discord_context, get_discord_bot,
     check_permissions, set_ephemeral, set_discord_response,
@@ -538,9 +534,7 @@ Add the imports near the top:
 
 ```python
 import os
-from dango.commands import ChatCog
-from dango.workflow import create_discord_workflow
-from dango.utils.runtime_config import RuntimeConfig
+from dango import ChatCog, create_discord_workflow, RuntimeConfig
 from neko_tools import (
     set_reminder_timezone, set_reminder_channel,
     list_events, create_event_with_ui, delete_event,
