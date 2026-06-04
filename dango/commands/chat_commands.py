@@ -11,7 +11,76 @@ from discord import app_commands
 from discord.ext import commands
 
 from ..steps.call_agent import deep_agent
+from ..tools.discord_tool import ContextMenuDef
 from ..utils.discord_helpers import format_reply_context
+
+
+def _build_interaction_message_data(
+    interaction: discord.Interaction,
+    bot_user_id: int,
+    content: str | None = None,
+    message_id: int | None = None,
+) -> dict[str, Any]:
+    """Build message_data from a Discord Interaction.
+
+    ``content`` and ``message_id`` can be supplied directly (used by context
+    menu handlers).  When omitted they are derived from the interaction type.
+    """
+    author = interaction.user
+    channel = interaction.channel
+    guild = interaction.guild
+
+    author_roles: list[str] = []
+    author_permissions: set[str] = set()
+    if guild and isinstance(author, discord.Member):
+        author_roles = [r.name for r in author.roles if r.name != "@everyone"]
+        author_permissions = {p for p, v in author.guild_permissions if v}
+
+    channel_name = ""
+    if channel:
+        channel_name = getattr(channel, "name", "DM")
+
+    if content is None:
+        if interaction.type == discord.InteractionType.modal_submit:
+            modal_id = interaction.data.get("custom_id", "").removeprefix("dango_modal:")
+            fields: dict[str, str] = {}
+            for row in interaction.data.get("components", []):
+                for comp in row.get("components", []):
+                    fields[comp.get("custom_id", "")] = comp.get("value", "")
+            fields_text = "\n".join(f"{k}: {v}" for k, v in fields.items())
+            content = f"[Modal submitted: {modal_id}]\n{fields_text}"
+        else:
+            component_id = interaction.data.get("custom_id", "").removeprefix("dango_component:")
+            selected: list[str] = interaction.data.get("values", [])
+            original_content = interaction.message.content if interaction.message else ""
+            if selected:
+                content = f"[Selected: {', '.join(selected)}] (component: {component_id})\nContext: {original_content}"
+            else:
+                content = f"[Button: {component_id}]\nContext: {original_content}"
+
+    if message_id is None and interaction.type == discord.InteractionType.component:
+        message_id = interaction.message.id if interaction.message else None
+
+    return {
+        "content": content,
+        "embeds": [],
+        "author_id": int(author.id),
+        "author_name": str(author.display_name),
+        "author_roles": author_roles,
+        "author_permissions": author_permissions,
+        "channel_id": int(channel.id) if channel else None,
+        "channel_name": channel_name,
+        "message_id": message_id,
+        "bot_user_id": int(bot_user_id),
+        "guild_id": int(guild.id) if guild else None,
+        "guild_name": str(guild.name) if guild else "",
+        "timestamp": datetime.now().isoformat(),
+        "created_at": datetime.now().isoformat(),
+        "is_dm": guild is None,
+        "has_embeds": False,
+        "message_type": "interaction",
+        "attachments": [],
+    }
 
 
 def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str, Any]:
@@ -35,15 +104,22 @@ def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str,
 
     guild_id = None
     guild_name = ""
+    author_roles: list[str] = []
+    author_permissions: set[str] = set()
     if message.guild:
         guild_id = int(message.guild.id)
         guild_name = str(message.guild.name)
+        author_roles = [r.name for r in message.author.roles if r.name != "@everyone"]
+        if isinstance(message.author, discord.Member):
+            author_permissions = {p for p, v in message.author.guild_permissions if v}
 
     return {
         "content": str(message.clean_content) if message.clean_content else "",
         "embeds": embeds,
         "author_id": author_id,
         "author_name": str(message.author.display_name),
+        "author_roles": author_roles,
+        "author_permissions": author_permissions,
         "channel_id": channel_id,
         "channel_name": channel_name,
         "message_id": message_id,
@@ -75,11 +151,13 @@ class ChatCog(commands.Cog):
         chat_system_prompt: str,
         runtime_config,
         extra_tools: list | None = None,
+        context_menu_defs: list[ContextMenuDef] | None = None,
     ):
         self.bot = bot
         self.discord_workflow = discord_workflow
         self.chat_system_prompt = chat_system_prompt
         self.runtime_config = runtime_config
+        self._context_menu_commands: list[app_commands.ContextMenu] = []
         # Pre-build agent pair that includes the caller's extra tools.
         # None means use the default module-level singletons in call_agent.py.
         if extra_tools:
@@ -88,6 +166,103 @@ class ChatCog(commands.Cog):
             print(f"🔧 [ChatCog] Built agent pair with {len(extra_tools)} extra tool(s)")
         else:
             self._agents = None
+        if context_menu_defs:
+            self._register_context_menus(context_menu_defs)
+
+    @commands.Cog.listener()
+    async def on_interaction(self, interaction: discord.Interaction):
+        if interaction.type == discord.InteractionType.modal_submit:
+            if interaction.data.get("custom_id", "").startswith("dango_modal:"):
+                await self._handle_dango_interaction(interaction)
+        elif interaction.type == discord.InteractionType.component:
+            if interaction.data.get("custom_id", "").startswith("dango_component:"):
+                await self._handle_dango_interaction(interaction)
+
+    async def _handle_dango_interaction(self, interaction: discord.Interaction) -> None:
+        print(f"🔘 [on_interaction] {interaction.type.name} from {interaction.user.display_name}")
+        try:
+            await interaction.response.defer()
+        except discord.InteractionResponded:
+            pass
+
+        message_data = _build_interaction_message_data(interaction, self.bot.user.id)
+        message_data["_bot"] = self.bot
+        message_data["_chat_sys_prompt"] = self.chat_system_prompt
+        message_data["_history_limit"] = self.runtime_config.history_limit
+        message_data["_interaction"] = interaction
+        if self._agents is not None:
+            message_data["_agents"] = self._agents
+
+        try:
+            await self.discord_workflow.arun(input=message_data)
+            print(f"✅ [on_interaction] Workflow completed")
+        except Exception as e:
+            print(f"❌ [on_interaction] Error: {e}")
+            import traceback
+            traceback.print_exc()
+            try:
+                await interaction.followup.send("Sorry, an error occurred.", ephemeral=True)
+            except Exception:
+                pass
+
+    def _register_context_menus(self, defs: list[ContextMenuDef]) -> None:
+        for defn in defs:
+            if defn.target == "message":
+                cmd = app_commands.ContextMenu(
+                    name=defn.name,
+                    callback=self._make_message_ctx_callback(defn),
+                )
+            else:
+                cmd = app_commands.ContextMenu(
+                    name=defn.name,
+                    callback=self._make_user_ctx_callback(defn),
+                )
+            self.bot.tree.add_command(cmd)
+            self._context_menu_commands.append(cmd)
+            print(f"🔧 [ChatCog] Registered context menu '{defn.name}' ({defn.target})")
+
+    def _make_message_ctx_callback(self, defn: ContextMenuDef):
+        async def callback(interaction: discord.Interaction, message: discord.Message):
+            await self._handle_context_menu(interaction, defn.build_content(message.content))
+        return callback
+
+    def _make_user_ctx_callback(self, defn: ContextMenuDef):
+        async def callback(interaction: discord.Interaction, member: discord.Member):
+            await self._handle_context_menu(interaction, defn.build_content(member.display_name))
+        return callback
+
+    async def _handle_context_menu(self, interaction: discord.Interaction, content: str) -> None:
+        print(f"🔘 [context_menu] '{interaction.data.get('name')}' by {interaction.user.display_name}")
+        try:
+            await interaction.response.defer()
+        except discord.InteractionResponded:
+            pass
+
+        message_data = _build_interaction_message_data(
+            interaction, self.bot.user.id, content=content
+        )
+        message_data["_bot"] = self.bot
+        message_data["_chat_sys_prompt"] = self.chat_system_prompt
+        message_data["_history_limit"] = self.runtime_config.history_limit
+        message_data["_interaction"] = interaction
+        if self._agents is not None:
+            message_data["_agents"] = self._agents
+
+        try:
+            await self.discord_workflow.arun(input=message_data)
+            print(f"✅ [context_menu] Workflow completed")
+        except Exception as e:
+            print(f"❌ [context_menu] Error: {e}")
+            import traceback
+            traceback.print_exc()
+            try:
+                await interaction.followup.send("Sorry, an error occurred.", ephemeral=True)
+            except Exception:
+                pass
+
+    async def cog_unload(self) -> None:
+        for cmd in self._context_menu_commands:
+            self.bot.tree.remove_command(cmd.name, type=cmd.type)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -235,12 +410,24 @@ class ChatCog(commands.Cog):
             channel_name = channel.name if hasattr(channel, "name") else "DM"
             guild_id = interaction.guild.id if interaction.guild else None
             guild_name = interaction.guild.name if interaction.guild else ""
+            author_roles = (
+                [r.name for r in author.roles if r.name != "@everyone"]
+                if interaction.guild and isinstance(author, discord.Member)
+                else []
+            )
+            author_permissions = (
+                {p for p, v in author.guild_permissions if v}
+                if interaction.guild and isinstance(author, discord.Member)
+                else set()
+            )
 
             message_data = {
                 "content": message,
                 "embeds": [],
                 "author_id": author.id,
                 "author_name": author.display_name,
+                "author_roles": author_roles,
+                "author_permissions": author_permissions,
                 "channel_id": channel.id,
                 "channel_name": channel_name,
                 "message_id": sent.id,
