@@ -17,15 +17,13 @@ from agno.agent import Agent
 
 
 _META_PROMPT = """\
-Read all files in the workspace and generate a short topic index.
-Each entry: topic name and a one-line description.
-End with a line telling the assistant to use the workspace tool for details.
+You are a system prompt engineer. Use the workspace tool to read all files, then generate a compact topic index to be injected into an AI assistant's system prompt.
 
-Example:
-## Workspace Topics
-- **Topic A** — what it covers
-- **Topic B** — what it covers
-Use the workspace tool for details on any topic above.\
+Each entry should be a broad, meaningful topic with a brief description — never copy or summarise actual content. The index exists only to tell the assistant what topics live in the workspace, not to answer questions itself.
+
+End with a clear directive instructing the assistant to always call the workspace tool for details on any listed topic.
+
+Write only the index block. No meta-commentary.\
 """
 
 _context: str = ""
