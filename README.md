@@ -280,6 +280,26 @@ git pull && uv sync
 
 Then restart the bot. `.env` and `config/` won't be overwritten.
 
+## Running on a VPS
+
+The Docker setup works on any VPS, but the web dashboard has no login screen — don't expose port `17860` to the internet. The fix is an SSH tunnel: keep the port closed in your firewall and forward it locally whenever you need to access the dashboard.
+
+```bash
+ssh -L 17860:localhost:17860 user@your-vps-ip
+```
+
+[→ Full VPS guide](https://zhiro-labs.github.io/dango/advanced/vps/)
+
+## Embedding into Another Bot
+
+Everything is a standard discord.py Cog, so you can drop Dango's agent and slash commands into any existing bot. You can also expose your own bot's commands as Agno tools — users ask naturally ("play some lofi") and the agent decides when to call them.
+
+```bash
+uv add git+https://github.com/zhiro-labs/dango
+```
+
+[→ Full embedding guide](https://zhiro-labs.github.io/dango/advanced/embedding/)
+
 ## Usage
 
 ### Starting a conversation

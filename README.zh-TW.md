@@ -280,6 +280,26 @@ git pull && uv sync
 
 重啟 Bot 即可。`.env` 和 `config/` 不會被覆蓋。
 
+## 部署到 VPS
+
+Docker 安裝在 VPS 上完全可行，但 Web Dashboard 沒有登入畫面——不要把 `17860` 埠開放到網際網路。解法是 SSH 通道：防火牆封鎖該埠，需要使用 Dashboard 時在本機做 port forwarding。
+
+```bash
+ssh -L 17860:localhost:17860 user@你的vps-ip
+```
+
+[→ 完整 VPS 部署指南](https://zhiro-labs.github.io/dango/advanced/vps/)
+
+## 嵌入其他 Bot
+
+所有功能都是標準 discord.py Cog，可以把 Dango 的 Agent 和 slash commands 塞進現有的 Bot。你也可以把自己 Bot 的指令包成 Agno tool——使用者自然地提問（「放點輕音樂」），Agent 自己決定什麼時候呼叫。
+
+```bash
+uv add git+https://github.com/zhiro-labs/dango
+```
+
+[→ 完整嵌入指南](https://zhiro-labs.github.io/dango/advanced/embedding/)
+
 ## 使用方法
 
 ### 開始對話
