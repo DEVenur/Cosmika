@@ -29,7 +29,7 @@ def _load_runtime() -> dict:
     if not _RUNTIME_PATH.exists():
         return {"allowed_channels": [], "allowed_users": [], "channel_metadata": {},
                 "user_metadata": {}, "timezone": "UTC", "discord_activity": "Surfing",
-                "history_limit": 6}
+                "history_limit": 12}
     try:
         data = yaml.safe_load(_RUNTIME_PATH.read_text(encoding="utf-8")) or {}
     except Exception:
@@ -41,7 +41,7 @@ def _load_runtime() -> dict:
         "user_metadata":    dict(data.get("user_metadata") or {}),
         "timezone":         str(data.get("timezone") or "UTC"),
         "discord_activity": str(data.get("discord_activity") or "Surfing"),
-        "history_limit":    int(data.get("history_limit") or 6),
+        "history_limit":    int(data.get("history_limit") or 12),
     }
 
 
@@ -514,7 +514,7 @@ async def save_workspace(
 async def save_runtime_settings(
     timezone: str = Form("UTC"),
     discord_activity: str = Form(""),
-    history_limit: str = Form("6"),
+    history_limit: str = Form("12"),
 ):
     rt = _load_runtime()
     rt["timezone"] = timezone.strip() or "UTC"

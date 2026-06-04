@@ -67,7 +67,7 @@ def inject_config_to_env() -> str | None:
     _set("GEMINI_GROUNDING_THRESHOLD",  cfg.get("gemini_grounding_threshold"))
     _set("GEMINI_THINKING_BUDGET",      cfg.get("gemini_thinking_budget"))
     _set("GEMINI_THINKING_LEVEL",       cfg.get("gemini_thinking_level"))
-    _set("CONTEXT_TOKEN_BUDGET",        cfg.get("context_token_budget", "8192"))
+    _set("CONTEXT_TOKEN_BUDGET",        cfg.get("context_token_budget"))
 
     # ── Per-model overrides ───────────────────────────────────────────────────
     for prefix in ("fast", "deep"):
