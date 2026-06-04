@@ -572,7 +572,7 @@ async def delete_runtime_user(user_id: int):
 
 
 @app.post("/api/workspace-prompt", response_class=HTMLResponse)
-async def save_workspace_prompt(workspace_sys_prompt: str = Form(...)):
+async def save_workspace_prompt(workspace_sys_prompt: str = Form(default="")):
     content = workspace_sys_prompt.strip()
     if not content:
         # Empty = let the bot auto-generate it on next startup
