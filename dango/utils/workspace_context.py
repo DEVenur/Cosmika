@@ -42,6 +42,7 @@ CRITICAL OUTPUT RULES — read carefully before writing a single word:
 
 Format of the output block:
 - A short header line identifying this as workspace context
+- One sentence summarising what this workspace is about
 - A bullet list of topic entries (name — one-line description)
 - The mandatory workspace-tool directive as the final paragraph
 
