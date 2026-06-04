@@ -331,13 +331,16 @@ Use `/newchat` to drop a session marker and start fresh. The bot ignores everyth
 
 ## Documentation
 
-**[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)**
+Full docs at **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)**
 
-| | |
+| Page | What's in it |
 |---|---|
-| [Environment Variables](https://zhiro-labs.github.io/dango/configuration/env-vars/) | [Model Providers & Routing](https://zhiro-labs.github.io/dango/features/models/) |
-| [Tools (search / API / SQL)](https://zhiro-labs.github.io/dango/features/tools/) | [Embedding into Another Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) |
-| [Workflow Architecture](https://zhiro-labs.github.io/dango/features/workflow/) | [VPS Deployment](https://zhiro-labs.github.io/dango/advanced/vps/) |
+| [Environment Variables](https://zhiro-labs.github.io/dango/configuration/env-vars/) | Every config option with defaults — models, routing, tools, Gemini settings |
+| [Model Providers & Routing](https://zhiro-labs.github.io/dango/features/models/) | Supported providers, dual-model AUTO_ROUTE, error fallback, local models |
+| [Tools](https://zhiro-labs.github.io/dango/features/tools/) | Workspace, DuckDuckGo, website fetching, custom APIs, SQL databases |
+| [Embedding into Another Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | Load the Cogs, expose your commands as Agno tools with `@discord_tool` |
+| [Workflow Architecture](https://zhiro-labs.github.io/dango/features/workflow/) | How the 4-step Agno pipeline works under the hood |
+| [VPS Deployment](https://zhiro-labs.github.io/dango/advanced/vps/) | Run on a server safely with SSH tunneling |
 
 ---
 

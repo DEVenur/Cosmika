@@ -331,13 +331,16 @@ uv add git+https://github.com/zhiro-labs/dango
 
 ## 文件
 
-**[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)**
+完整文件在 **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)**
 
-| | |
+| 頁面 | 內容 |
 |---|---|
-| [環境變數](https://zhiro-labs.github.io/dango/configuration/env-vars/) | [模型 Provider 與路由](https://zhiro-labs.github.io/dango/features/models/) |
-| [工具（搜尋 / API / SQL）](https://zhiro-labs.github.io/dango/features/tools/) | [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) |
-| [Workflow 架構](https://zhiro-labs.github.io/dango/features/workflow/) | [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) |
+| [環境變數](https://zhiro-labs.github.io/dango/configuration/env-vars/) | 所有設定選項與預設值——模型、路由、工具、Gemini 專屬設定 |
+| [模型 Provider 與路由](https://zhiro-labs.github.io/dango/features/models/) | 支援的 Provider、雙模型 AUTO_ROUTE、錯誤回退、本地模型 |
+| [工具](https://zhiro-labs.github.io/dango/features/tools/) | Workspace、DuckDuckGo、網頁抓取、Custom API、SQL 資料庫 |
+| [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | 載入 Cog、用 `@discord_tool` 把指令包成 Agno 工具 |
+| [Workflow 架構](https://zhiro-labs.github.io/dango/features/workflow/) | 四步驟 Agno pipeline 的內部運作方式 |
+| [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) | 用 SSH 通道安全地在伺服器上運行 |
 
 ---
 
