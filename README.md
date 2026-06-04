@@ -16,7 +16,7 @@ Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers 
 - **Gets reply context** — when someone replies to a Discord message, the quoted content is woven into the prompt naturally.
 - **Renders tables** — any markdown table in the bot's reply is auto-converted to a PNG image (with CJK font support).
 
-Give the bot tools to work with:
+And that's not all — you can also give it tools:
 
 - **Workspace file access** — mount a local folder so the bot can look up files on demand (great for custom game data, knowledge bases, etc.)
 - **DuckDuckGo search** — free web search that works with any model provider (`ENABLE_DUCKDUCKGO=on`, no API key needed).

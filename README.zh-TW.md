@@ -16,7 +16,7 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 - **理解 Discord 回覆** — 有人回覆某則訊息時，被引用的內容會自然地融入 prompt。
 - **表格變圖片** — Bot 回覆裡的 Markdown 表格自動渲染成 PNG（支援中日韓字型），手機上也看得清楚。
 
-幫 Bot 裝上工具：
+不只這些，還可以幫它裝上工具：
 
 - **Workspace 知識庫** — 掛載本地資料夾，Bot 就能按需查詢裡面的檔案，不用每次把資料貼進對話。
 - **DuckDuckGo 搜尋** — 免費網路搜尋，支援所有 Provider（`ENABLE_DUCKDUCKGO=on`，不需 API Key）。
