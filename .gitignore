@@ -1,0 +1,37 @@
+# Environment variables - DO NOT COMMIT
+.env
+
+# macOS specific files
+.DS_Store
+
+# Ignore downloaded assets
+assets/fonts/*
+
+# Python cache files
+__pycache__/
+
+# Local configuration overrides
+config/chat_sys_prompt.txt
+config/runtime.yml
+config/workspace_sys_prompt.txt
+
+# Claude Code project instructions and local settings (local only)
+CLAUDE.md
+.claude/
+
+# Virtual Environment
+.venv/
+
+# Temporary files
+temp/
+
+# Log files
+*.log
+logs/
+
+# Workspace data (user-managed; directory is tracked, contents are not)
+workspace/*
+!workspace/.gitkeep
+
+# Web GUI data directory (contains secrets, never commit)
+data/
