@@ -1,0 +1,73 @@
+# uv Setup
+
+The uv path is for developers or anyone who prefers running the bot directly without Docker.
+
+## Prerequisites
+
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) — install with `curl -LsSf https://astral.sh/uv/install.sh | sh` (Mac/Linux)
+- A Discord bot token — see [Discord Setup](discord-setup.md)
+- An API key for your chosen model provider
+
+## Steps
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/zhiro-labs/dango
+cd dango
+uv sync
+```
+
+### 2. Copy config files
+
+```bash
+cp .env.example .env
+cp config/runtime.yml.example config/runtime.yml
+cp config/chat_sys_prompt.txt.example config/chat_sys_prompt.txt
+```
+
+### 3. Fill in `.env`
+
+Open `.env` and set at minimum these four values:
+
+```env
+DISCORD_BOT_TOKEN=your_discord_token
+FAST_API_KEY=your_api_key
+FAST_MODEL=google:gemma-4-26b-a4b-it   # format: provider:model_id
+CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
+```
+
+See [Model Providers](../features/models.md) for the full list of supported `provider:` prefixes and where to get API keys.
+
+### 4. Edit the system prompt
+
+Open `config/chat_sys_prompt.txt` and give the bot its personality. This is the instruction the model receives before every conversation.
+
+### 5. Run
+
+```bash
+uv run main.py
+```
+
+On first run, Noto Sans CJK fonts (~100 MB) download automatically for table rendering.
+
+## Updating
+
+```bash
+git pull
+uv sync
+```
+
+Then restart the bot. `.env` and `config/` are not touched by updates.
+
+## Managing the bot
+
+**Stop:** Press **Ctrl+C** in the terminal running `uv run main.py`.
+
+**Start again:**
+```bash
+uv run main.py
+```
+
+Your `.env` and everything in `config/` persists between restarts.

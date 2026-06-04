@@ -1,0 +1,68 @@
+site_name: Dango
+site_description: Discord AI Agent powered by Agno
+site_url: https://zhiro-labs.github.io/dango
+repo_url: https://github.com/zhiro-labs/dango
+repo_name: zhiro-labs/dango
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: pink
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - copy-to-llm:
+      repo_url: "https://raw.githubusercontent.com/zhiro-labs/dango/main"
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Discord Setup: getting-started/discord-setup.md
+    - Docker (Recommended): getting-started/docker.md
+    - uv (Developers): getting-started/uv.md
+  - Configuration:
+    - Environment Variables: configuration/env-vars.md
+    - Runtime Config: configuration/runtime.md
+  - Features:
+    - Model Providers & Routing: features/models.md
+    - Tools: features/tools.md
+    - Workflow Architecture: features/workflow.md
+  - Usage:
+    - Slash Commands: usage/commands.md
+    - Conversations: usage/conversations.md
+  - Advanced:
+    - Embedding into Another Bot: advanced/embedding.md
+    - VPS Deployment: advanced/vps.md

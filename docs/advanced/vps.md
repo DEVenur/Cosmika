@@ -1,0 +1,44 @@
+# VPS Deployment
+
+The Docker setup works on any VPS. The one thing to be careful about: **the web dashboard has no login screen**.
+
+## Secure the dashboard port
+
+Do **not** open port `17860` in your VPS firewall. Anyone who can reach it can read and change your Discord token and API keys.
+
+Instead, access the dashboard through an SSH tunnel:
+
+```bash
+ssh -L 17860:localhost:17860 user@your-vps-ip
+```
+
+Open `http://localhost:17860` in your browser — traffic goes through SSH to your VPS. The port never touches the public internet.
+
+To run the tunnel in the background:
+
+```bash
+ssh -fNL 17860:localhost:17860 user@your-vps-ip
+```
+
+`-f` sends it to the background; `-N` means "don't run any commands, just forward the port."
+
+## Keeping the bot running
+
+Docker containers stop when the VPS reboots unless you configure Docker to start on login, or use a systemd service. The simplest approach:
+
+```bash
+# After reboot, cd to the folder with docker-compose.yml and run:
+docker compose start
+```
+
+For a production setup, enable Docker's restart policy in `docker-compose.yml`:
+
+```yaml
+services:
+  bot:
+    restart: unless-stopped
+  web:
+    restart: unless-stopped
+```
+
+With `unless-stopped`, containers restart automatically after a reboot unless you explicitly stopped them with `docker compose stop`.
