@@ -66,3 +66,6 @@ nav:
   - Advanced:
     - Embedding into Another Bot: advanced/embedding.md
     - VPS Deployment: advanced/vps.md
+  - Reference:
+    - API Reference: reference/api.md
+    - Troubleshooting: troubleshooting.md

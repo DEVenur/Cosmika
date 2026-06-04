@@ -53,21 +53,11 @@ If no tables are found, this step passes through transparently.
 Sends the final response back to Discord:
 
 - Splits messages longer than Discord's 2000-character limit across multiple messages
-- Attaches rendered table PNG files
-- Prepends any `[dango-sysinfo]` notes (e.g. fallback notifications)
-- Handles error messages from earlier steps
-
-## Step 4 — SendResponse
-
-**File:** `dango/steps/send_response.py`
-
-Sends the final response back to Discord:
-
-- Splits messages longer than Discord's 2000-character limit across multiple messages
 - Attaches rendered table PNG files and any `discord.Embed` objects set by tools via `set_discord_response()`
 - Respects the `suppress_text` flag — when a tool has already sent content directly (e.g. a native `discord.ui.View`), the LLM text is silently dropped
 - For interaction-triggered runs (button, modal, context menu), uses `interaction.followup.send()` instead of `channel.send()`; respects the `ephemeral` flag set by `set_ephemeral()`
 - Prepends any `[dango-sysinfo]` notes (e.g. fallback notifications)
+- Handles error messages from earlier steps
 
 ## Entry points
 

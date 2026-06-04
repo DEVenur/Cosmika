@@ -275,6 +275,16 @@ The key difference from `dango_component:` routing: `EventView`'s buttons and se
 
 For simpler interactions where you *do* want the LLM to process the result, prefix `custom_id` with `dango_modal:` or `dango_component:`. Dango routes these back through the full workflow automatically.
 
+!!! warning "`custom_id` length limit"
+    Discord enforces a 100-character limit on `custom_id`. The prefixes themselves consume some of that space:
+
+    | Prefix | Prefix length | Remaining for your ID |
+    |---|---|---|
+    | `dango_component:` | 17 chars | 83 chars |
+    | `dango_modal:` | 12 chars | 88 chars |
+
+    IDs that exceed the limit are silently truncated by Discord, which will break routing.
+
 ### Modal submit
 
 ```python
@@ -371,6 +381,13 @@ await bot.add_cog(ChatCog(
 | `target` | `"message"` or `"user"` |
 | `content_builder` | Optional callable `(str) → str`; transforms the target text into the agent's input. Defaults to `[Context menu: <name>]\nTarget: <text>` |
 
+The `str` argument passed to `content_builder` depends on `target`:
+
+| `target` | `str` value |
+|---|---|
+| `"message"` | The message's text content (`message.content`) |
+| `"user"` | The user's display name — **not** the user ID or mention string |
+
 ---
 
 ## Full example — Neko reminder bot
@@ -421,7 +438,9 @@ from dango import (
     check_permissions, set_ephemeral, set_discord_response,
 )
 import db
-from main import parse_date, parse_time, reminder_delta, discord_ts, EventView
+# NOTE: main.py imports neko_tools at the top level, so we cannot import from
+# main at module level here — that would create a circular import.
+# Import helpers lazily, inside each function that needs them.
 
 
 @discord_tool(name="set_reminder_timezone")
@@ -453,6 +472,7 @@ async def set_reminder_channel(run_context: RunContext) -> str:
 @discord_tool(name="list_events")
 async def list_events(run_context: RunContext) -> str:
     """List all upcoming events."""
+    from main import discord_ts  # deferred to avoid circular import
     ctx = get_discord_context(run_context)
     bot = get_discord_bot(run_context)
     reminder_channel_id = db.get_reminder_channel(ctx["guild_id"])
@@ -488,6 +508,7 @@ async def create_event_with_ui(title: str, date: str, time: str, run_context: Ru
         date (str): Date in YYYY-MM-DD format
         time (str): Time in HH:MM format
     """
+    from main import parse_date, parse_time, reminder_delta, discord_ts, EventView  # deferred to avoid circular import
     ctx = get_discord_context(run_context)
     bot = get_discord_bot(run_context)
 

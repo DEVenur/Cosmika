@@ -71,7 +71,17 @@ With `FALLBACK_ON_ERROR=on`, if one model returns an error, the bot retries with
 - `fast → deep`: fast model fails → retry with deep model
 - `deep → fast`: deep model fails → retry with fast model
 
-A `[dango-sysinfo]` note appears in the channel when fallback fires. Works best when fast and deep use **different providers** — same-provider fallback cannot protect against provider-wide outages (a warning is printed at startup if this is the case).
+A `[dango-sysinfo]` note appears in the channel when fallback fires — the message format is:
+
+```
+> [dango-sysinfo] ⚡ google:gemini-2.0-flash failed — response served by google:gemini-2.5-pro.
+```
+
+Works best when fast and deep use **different providers** — same-provider fallback cannot protect against provider-wide outages. If both models share a provider, this warning is printed at startup:
+
+```
+⚠️  [config] FAST_MODEL and DEEP_MODEL share provider 'google' — FALLBACK_ON_ERROR won't protect against provider-wide outages.
+```
 
 Non-Gemini providers retry 2× before triggering fallback. Gemini handles its own retries internally.
 

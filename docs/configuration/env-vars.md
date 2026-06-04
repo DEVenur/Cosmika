@@ -2,7 +2,12 @@
 
 Configuration lives in `.env` (uv path) or `data/config.yaml` (Docker / web dashboard). Both map to the same environment variables described here.
 
-> **`on`/`off` vs `true`/`false`**: Most variables use `on`/`off`. The `GEMINI_*` variables use `true`/`false` because they are passed directly to the Google SDK. Mixing them up (e.g. `ENABLE_DUCKDUCKGO=true`) will silently disable the feature.
+!!! warning "`on`/`off` vs `true`/`false`"
+    Most variables use `on`/`off`. The `GEMINI_*` variables use `true`/`false` because they are passed directly to the Google SDK.
+
+    **Mixing them up silently disables the feature** — `ENABLE_DUCKDUCKGO=true` will not report an error but the tool will not be registered.
+
+    Each variable in the tables below shows its accepted values.
 
 ## Required
 
@@ -24,8 +29,8 @@ Configuration lives in `.env` (uv path) or `data/config.yaml` (Docker / web dash
 |---|---|---|
 | `DEEP_MODEL` | _(off)_ | Second model in `provider:model_id` format. Leave blank to disable routing. |
 | `DEEP_API_KEY` | same as `FAST_API_KEY` | API key for the deep model (only needed for a different provider) |
-| `AUTO_ROUTE` | `off` | `on` — send complex messages to `DEEP_MODEL` automatically |
-| `FALLBACK_ON_ERROR` | `off` | `on` — fall back to the other model when one returns an error |
+| `AUTO_ROUTE` | `off` | **`on`/`off`** — send complex messages to `DEEP_MODEL` automatically |
+| `FALLBACK_ON_ERROR` | `off` | **`on`/`off`** — fall back to the other model when one returns an error |
 
 See [Model Providers & Routing](../features/models.md) for details on how routing works.
 
@@ -51,21 +56,21 @@ When the bot runs in Docker and the model server runs on the host, use `host.doc
 
 | Variable | Default | Description |
 |---|---|---|
-| `ENABLE_CONTEXTUAL_SYSTEM_PROMPT` | `on` | Inject user display names and current time into the system prompt |
+| `ENABLE_CONTEXTUAL_SYSTEM_PROMPT` | `on` | **`on`/`off`** — inject user display names and current time into the system prompt |
 | `CONTEXT_TOKEN_BUDGET` | `0` | Max input tokens per request; oldest messages are dropped when exceeded. `0` = no limit. |
 
 ## Web search & browsing
 
 | Variable | Default | Description |
 |---|---|---|
-| `ENABLE_DUCKDUCKGO` | `off` | `on` — free DuckDuckGo search, works with any provider |
-| `ENABLE_WEBSITE_TOOLS` | `off` | `on` — let the bot fetch and read URLs from the conversation |
+| `ENABLE_DUCKDUCKGO` | `off` | **`on`/`off`** — free DuckDuckGo search, works with any provider |
+| `ENABLE_WEBSITE_TOOLS` | `off` | **`on`/`off`** — let the bot fetch and read URLs from the conversation |
 
 ## Workspace
 
 | Variable | Default | Description |
 |---|---|---|
-| `ENABLE_WORKSPACE` | `off` | `on` — give the bot read access to a local folder |
+| `ENABLE_WORKSPACE` | `off` | **`on`/`off`** — give the bot read access to a local folder |
 | `WORKSPACE_ROOT` | `workspace/` | Root folder the bot can access |
 | `WORKSPACE_SYS_PROMPT_PATH` | `config/workspace_sys_prompt.txt` | Where to store the generated workspace context |
 
@@ -75,9 +80,9 @@ See [Tools](../features/tools.md) for more on workspace behaviour.
 
 | Variable | Default | Description |
 |---|---|---|
-| `ENABLE_CUSTOM_APIS` | `off` | `on` — enable HTTP API tools defined in `CUSTOM_APIS_JSON` |
-| `CUSTOM_APIS_JSON` | `[]` | JSON array of REST API configs (`name`, `base_url`, `api_key`, `description`) |
-| `ENABLE_SQL_DATABASES` | `off` | `on` — enable SQL tools defined in `SQL_DATABASES_JSON` |
+| `ENABLE_CUSTOM_APIS` | `off` | **`on`/`off`** — enable HTTP API tools defined in `CUSTOM_APIS_JSON` |
+| `CUSTOM_APIS_JSON` | `[]` | JSON array of REST API configs (`name`, `base_url`, `api_key`, `description`). **Must be a single line** — see [Tools](../features/tools.md#custom-api-tools) |
+| `ENABLE_SQL_DATABASES` | `off` | **`on`/`off`** — enable SQL tools defined in `SQL_DATABASES_JSON` |
 | `SQL_DATABASES_JSON` | `[]` | JSON array of database configs (`name`, `db_url`, `description`) |
 
 ## Google / Gemini-specific
@@ -88,9 +93,9 @@ These apply to `google:` models only. Ignored for all other providers.
 
 | Variable | Default | Description |
 |---|---|---|
-| `GEMINI_SEARCH` | `true` | Enable Google Search grounding |
+| `GEMINI_SEARCH` | `true` | **`true`/`false`** — enable Google Search grounding |
 | `GEMINI_GROUNDING_THRESHOLD` | model default | Apply grounding only when confidence is below this value (0.0–1.0) |
-| `GEMINI_URL_CONTEXT` | `false` | Let the model fetch URLs mentioned in the conversation (Gemini only; not `gemma-*`) |
+| `GEMINI_URL_CONTEXT` | `false` | **`true`/`false`** — let the model fetch URLs mentioned in the conversation (Gemini only; not `gemma-*`) |
 
 ### Thinking (Gemini 2.5+ / Gemma 4)
 

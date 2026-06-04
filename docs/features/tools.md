@@ -39,7 +39,7 @@ dango/
     └── characters.csv
 ```
 
-**What files can it read?** Any file under 100,000 lines or 10 MB. Plain-text formats (`.txt`, `.json`, `.yaml`, `.md`, `.csv`) are most useful — binary files come out as raw bytes.
+**What files can it read?** Any file under 100,000 lines or 10 MB. Plain-text formats (`.txt`, `.json`, `.yaml`, `.md`, `.csv`) are most useful — binary files come out as raw bytes. Files over 10 MB are silently skipped.
 
 ### Workspace context injection
 
@@ -48,6 +48,14 @@ On startup, the bot uses the LLM to write a short description of `WORKSPACE_ROOT
 - **First run**: the context is generated and saved to `WORKSPACE_SYS_PROMPT_PATH` (default: `config/workspace_sys_prompt.txt`)
 - **Later runs**: the saved file is used as-is; edit it freely and your changes stick
 - **Live reload**: a background task checks the workspace every 30 seconds and reloads if files change
+
+### Edge cases
+
+| Situation | Behaviour |
+|---|---|
+| Workspace folder is empty | Context generation is skipped; workspace context is not injected. Bot starts normally. |
+| LLM returns an empty response during generation | A warning is printed (`⚠️ Workspace context generation returned empty`) and the context file is not written. Bot continues without workspace context. |
+| File exceeds 10 MB | The file is silently skipped by the workspace tool. |
 
 ## Custom API Tools
 
@@ -58,7 +66,15 @@ ENABLE_CUSTOM_APIS=on
 CUSTOM_APIS_JSON=[{"name": "weather", "base_url": "https://api.example.com", "api_key": "secret", "description": "Weather API"}]
 ```
 
-> **Note:** `CUSTOM_APIS_JSON` must be a single line in `.env`. Multi-line JSON will be parsed incorrectly. Use the Docker web dashboard to manage these entries without worrying about formatting.
+!!! warning "Single-line requirement"
+    `CUSTOM_APIS_JSON` must be a single line in `.env`. Multi-line JSON silently fails — the variable is empty and no tools are created, with no error message.
+
+    Compress your JSON to a single line before pasting:
+    ```bash
+    echo '[{"name":"weather",...}]' | jq -c '.'
+    ```
+
+    The Docker web dashboard handles this automatically — use it if you want to avoid the formatting entirely.
 
 Each entry creates a tool named `call_<name>_api`. The model decides when to call it based on the `description` field — be descriptive about what the API does and what kind of questions should trigger it. When the bot calls the tool, it can send `GET` or `POST` to any path under `base_url`, pass query parameters and a JSON body, with Bearer auth automatically added if `api_key` is set.
 
