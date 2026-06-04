@@ -18,7 +18,7 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 
 不只這些，還可以幫它裝上工具：
 
-- **Workspace 知識庫** — 掛載本地資料夾，Bot 就能按需查詢裡面的檔案，不用每次把資料貼進對話。
+- **Workspace 知識庫** — 掛載本地資料夾，Bot 就成了整個團隊的活知識庫。自訂遊戲資料、共用文件、社群 Wiki、內部 FAQ——成員直接問，Bot 從你的檔案裡回答。
 - **DuckDuckGo 搜尋** — 免費網路搜尋，支援所有 Provider（`ENABLE_DUCKDUCKGO=on`，不需 API Key）。
 - **網頁工具** — 讓 Bot 抓取並閱讀對話中出現的 URL，支援所有 Provider。
 - **Custom API 工具** — 在 Web Dashboard 貼上 URL，Bot 就能呼叫你的 API，不需要改程式碼。

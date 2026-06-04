@@ -18,7 +18,7 @@ Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers 
 
 And that's not all — you can also give it tools:
 
-- **Workspace file access** — mount a local folder so the bot can look up files on demand (great for custom game data, knowledge bases, etc.)
+- **Workspace file access** — mount a local folder and the bot becomes your team's living reference. Custom game data, shared docs, community wikis, internal FAQs — members ask, the bot answers from your own files.
 - **DuckDuckGo search** — free web search that works with any model provider (`ENABLE_DUCKDUCKGO=on`, no API key needed).
 - **Website tool** — lets the bot fetch and read URLs from the conversation, for any provider.
 - **Custom API tools** — plug any HTTP API into the bot through the web dashboard; no code changes needed.
