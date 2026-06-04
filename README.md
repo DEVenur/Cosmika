@@ -12,19 +12,22 @@ Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers 
 
 - **Use any AI provider** — set `FAST_MODEL` to `provider:model_id` (e.g. `google:gemini-2.5-flash`, `openai:gpt-4o`, `anthropic:claude-sonnet-4-20250514`, `groq:llama-3.3-70b-versatile`) and the bot figures out the right SDK and API key automatically.
 - **Run locally** — point `FAST_MODEL` at a local Ollama or LM Studio instance and set `FAST_BASE_URL` to its address. Running the bot in Docker while the model server is on the host? Use `http://host.docker.internal:<port>` and it just works.
-- **Fast + deep model pairing** — set up a cheap fast model for everyday questions and a powerful deep model for complex ones. `AUTO_ROUTE=on` switches automatically; `/deep` forces the deep model for a single message.
-- **Handles errors gracefully** — retries on transient failures and falls back to your deep model when the fast one is down.
 - **Understands images** — users can attach images to their messages; the bot passes them straight to the model.
 - **Gets reply context** — when someone replies to a Discord message, the quoted content is woven into the prompt naturally.
 - **Renders tables** — any markdown table in the bot's reply is auto-converted to a PNG image (with CJK font support).
-- **No restarts needed** — channels, users, history limit, timezone, and activity status are all adjustable live via slash commands.
-- **Fresh start anytime** — `/newchat` drops a marker so the bot ignores everything before it.
+
+Give the bot tools to work with:
+
 - **Workspace file access** — mount a local folder so the bot can look up files on demand (great for custom game data, knowledge bases, etc.)
 - **DuckDuckGo search** — free web search that works with any model provider (`ENABLE_DUCKDUCKGO=on`, no API key needed).
 - **Website tool** — lets the bot fetch and read URLs from the conversation, for any provider.
 - **Custom API tools** — plug any HTTP API into the bot through the web dashboard; no code changes needed.
 - **SQL database tools** — add a database connection string in the dashboard and the bot gets `list_tables` + `run_query` tools automatically.
-- **Embeddable** — the whole thing is a standard discord.py Cog; drop it into any existing bot in a few lines. [Learn more →](https://zhiro-labs.github.io/dango/advanced/embedding/)
+
+Already have a Discord bot?
+
+- **Embeddable** — the whole thing is a standard discord.py Cog; drop Dango's agent and slash commands into any existing bot in a few lines.
+- **Commands as tools** — wrap your bot's existing commands with `@discord_tool` and the agent can call them on behalf of users. Your original `!play` / `/play` keep working unchanged.
 
 ## Before you start
 
