@@ -15,6 +15,9 @@ Models are specified as `provider:model_id`. The bot automatically maps `FAST_AP
 | `xai:` | `xai:grok-3` | [xAI Console](https://console.x.ai/) |
 | `deepseek:` | `deepseek:deepseek-chat` | [DeepSeek Platform](https://platform.deepseek.com/) |
 | `ollama:` | `ollama:llama3.2` | Local (no key needed) |
+| `lmstudio:` | `lmstudio:my-model` | Local (no key needed) |
+| `vllm:` | `vllm:my-model` | Local (no key needed) |
+| `openai-chat:` | `openai-chat:my-model` | Any OpenAI-compatible API |
 
 For the complete provider list, see the [Agno model index](https://docs.agno.com/models/providers/model-index).
 
@@ -57,9 +60,9 @@ Force the deep model for a single message regardless of AUTO_ROUTE:
 
 Requires `DEEP_MODEL` to be set.
 
-### URL upgrade (Gemini-specific)
+### Auto-route on URL (Gemini-specific)
 
-If the fast model is a Gemini without `url_context` enabled, but the deep model has it enabled, any message containing a URL is automatically routed to the deep model.
+If the fast model is a Gemini without `url_context` enabled, but the deep model has it enabled, any message containing a URL is automatically routed to the deep model — so that the model with URL-reading capability handles it.
 
 ## Error fallback
 

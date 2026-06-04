@@ -41,9 +41,9 @@ Either way, start with [Discord Setup](getting-started/discord-setup.md) to crea
 ## Project Structure
 
 ```
-dango/
+dango/                         # repo root
 ├── main.py                    # Entry point
-├── dango/
+├── dango/                     # Python package
 │   ├── app_config.py          # Web UI config injection
 │   ├── workflow.py            # Agno Workflow definition
 │   ├── steps/                 # 4-step pipeline

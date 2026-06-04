@@ -24,7 +24,7 @@ from dango.workflow import create_discord_workflow
 with open("config/chat_sys_prompt.txt", encoding="utf-8") as f:
     chat_system_prompt = f.read()
 
-runtime_config = RuntimeConfig("config/runtime.yml")
+runtime_config = RuntimeConfig("config/runtime.yml")  # path is configurable; file is created automatically on first write
 discord_workflow = create_discord_workflow()
 
 await bot.add_cog(ChatCog(bot, discord_workflow, chat_system_prompt, runtime_config))

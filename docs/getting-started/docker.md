@@ -36,6 +36,16 @@ Go to `http://localhost:17860` in your browser. The wizard will ask for:
 
 Save, and the bot connects to Discord automatically.
 
+### 4. Test the bot
+
+In Discord, mention the bot in any channel it can see:
+
+```
+@YourBotName hello!
+```
+
+It should reply within a few seconds. If it doesn't, run `docker compose logs` to check for errors.
+
 ## Managing the bot
 
 ```bash

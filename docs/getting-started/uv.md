@@ -27,6 +27,8 @@ cp config/runtime.yml.example config/runtime.yml
 cp config/chat_sys_prompt.txt.example config/chat_sys_prompt.txt
 ```
 
+`runtime.yml` stores live settings — allowed channels, DM users, timezone, history limit. The bot writes this file automatically when you use slash commands; you rarely need to touch it by hand. See [Runtime Config](../configuration/runtime.md) for details.
+
 ### 3. Fill in `.env`
 
 Open `.env` and set at minimum these four values:
@@ -51,6 +53,16 @@ uv run main.py
 ```
 
 On first run, Noto Sans CJK fonts (~100 MB) download automatically for table rendering.
+
+### 6. Test the bot
+
+In Discord, mention the bot in any channel it can see:
+
+```
+@YourBotName hello!
+```
+
+It should reply within a few seconds. If it doesn't, check the terminal for error messages.
 
 ## Updating
 

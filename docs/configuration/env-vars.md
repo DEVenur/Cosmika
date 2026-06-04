@@ -2,14 +2,21 @@
 
 Configuration lives in `.env` (uv path) or `data/config.yaml` (Docker / web dashboard). Both map to the same environment variables described here.
 
+> **`on`/`off` vs `true`/`false`**: Most variables use `on`/`off`. The `GEMINI_*` variables use `true`/`false` because they are passed directly to the Google SDK. Mixing them up (e.g. `ENABLE_DUCKDUCKGO=true`) will silently disable the feature.
+
 ## Required
 
 | Variable | Description |
 |---|---|
 | `DISCORD_BOT_TOKEN` | Your Discord bot token |
-| `FAST_MODEL` | Model in `provider:model_id` format (e.g. `google:gemma-4-26b-a4b-it`) |
-| `FAST_API_KEY` | API key for the fast model's provider |
-| `CHAT_SYS_PROMPT_PATH` | Path to the system prompt file (uv path only) |
+| `FAST_MODEL` | Model in `provider:model_id` format (e.g. `google:gemini-2.5-flash`) |
+| `FAST_API_KEY` | API key for the fast model's provider. For local servers (Ollama, LM Studio) that require no authentication, set this to any non-empty string (e.g. `local`). |
+
+## uv path only
+
+| Variable | Description |
+|---|---|
+| `CHAT_SYS_PROMPT_PATH` | Path to the system prompt file (e.g. `config/chat_sys_prompt.txt`). Docker users configure the system prompt through the web dashboard instead. |
 
 ## Dual-model routing
 
@@ -94,7 +101,7 @@ These apply to `google:` models only. Ignored for all other providers.
 
 ### Per-model overrides
 
-Any `GEMINI_*` variable can be overridden for just one model using the `FAST_` or `DEEP_` prefix:
+Any `GEMINI_*` variable can be overridden for just one model using the `FAST_` or `DEEP_` prefix. `CONTEXT_TOKEN_BUDGET` (defined under [Bot behaviour](#bot-behaviour) above) also supports per-model overrides:
 
 | Shared default | Fast override | Deep override |
 |---|---|---|

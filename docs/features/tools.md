@@ -58,7 +58,9 @@ ENABLE_CUSTOM_APIS=on
 CUSTOM_APIS_JSON=[{"name": "weather", "base_url": "https://api.example.com", "api_key": "secret", "description": "Weather API"}]
 ```
 
-Each entry creates a tool named `call_<name>_api`. The bot can call it with `GET`/`POST`, optional query params, JSON body, and Bearer auth pre-configured.
+> **Note:** `CUSTOM_APIS_JSON` must be a single line in `.env`. Multi-line JSON will be parsed incorrectly. Use the Docker web dashboard to manage these entries without worrying about formatting.
+
+Each entry creates a tool named `call_<name>_api`. The model decides when to call it based on the `description` field — be descriptive about what the API does and what kind of questions should trigger it. When the bot calls the tool, it can send `GET` or `POST` to any path under `base_url`, pass query parameters and a JSON body, with Bearer auth automatically added if `api_key` is set.
 
 Fields per entry:
 

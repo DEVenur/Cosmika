@@ -221,7 +221,7 @@ Open `.env` and fill in at least these four:
 ```env
 DISCORD_BOT_TOKEN=your_discord_token
 FAST_API_KEY=your_api_key
-FAST_MODEL=google:gemma-4-26b-a4b-it   # format: provider:model_id
+FAST_MODEL=google:gemini-2.5-flash   # format: provider:model_id
 CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
 ```
 

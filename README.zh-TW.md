@@ -221,7 +221,7 @@ cp .env.example .env
 ```env
 DISCORD_BOT_TOKEN=你的_discord_token
 FAST_API_KEY=你的_api_key
-FAST_MODEL=google:gemma-4-26b-a4b-it   # 格式：provider:model_id
+FAST_MODEL=google:gemini-2.5-flash   # 格式：provider:model_id
 CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
 ```
 

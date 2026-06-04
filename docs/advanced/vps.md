@@ -31,14 +31,16 @@ Docker containers stop when the VPS reboots unless you configure Docker to start
 docker compose start
 ```
 
-For a production setup, enable Docker's restart policy in `docker-compose.yml`:
+For a production setup, add a `restart` policy to each service in `docker-compose.yml`. Open the file and add `restart: unless-stopped` under each service name:
 
 ```yaml
 services:
   bot:
-    restart: unless-stopped
+    restart: unless-stopped   # add this line
+    image: ...
   web:
-    restart: unless-stopped
+    restart: unless-stopped   # add this line
+    image: ...
 ```
 
 With `unless-stopped`, containers restart automatically after a reboot unless you explicitly stopped them with `docker compose stop`.

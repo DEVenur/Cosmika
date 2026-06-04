@@ -19,32 +19,7 @@ The bot writes this file automatically when you use slash commands. You can also
 
 ## Slash Commands
 
-All admin commands require the **Administrator** permission. Responses are ephemeral (only visible to you).
-
-### Channel management
-
-| Command | Description |
-|---|---|
-| `/addchannel` | Allow the bot to respond in the current channel without being mentioned |
-| `/removechannel` | Remove the current channel from the allowed list |
-| `/listchannels` | List all allowed channels in this server |
-
-### User management (DMs)
-
-| Command | Description |
-|---|---|
-| `/adduser @user` | Allow a user to DM the bot |
-| `/removeuser @user` | Remove a user from the DM allowlist |
-| `/listusers` | List all users allowed to DM the bot |
-
-### Other settings
-
-| Command | Description |
-|---|---|
-| `/sethistorylimit <n>` | Number of past messages included as context (e.g. `20`) |
-| `/settimezone <tz>` | Bot's timezone for timestamps — supports autocomplete (e.g. `Asia/Taipei`) |
-| `/setactivity <text>` | Discord activity status message (max 128 characters) |
-| `/refreshmetadata` | Refresh display names for all saved channels and users |
+All settings in `runtime.yml` are managed through Discord slash commands — no file editing needed. See the [Slash Commands reference](../usage/commands.md) for the full list.
 
 ## Default behaviour
 
