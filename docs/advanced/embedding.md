@@ -360,7 +360,42 @@ await bot.add_cog(ChatCog(
 
 ## Full example — Neko reminder bot
 
-Neko has `/event`, `/event-list`, `/event-delete`, `/set-reminder-timezone`, and `/set-reminder-channel`. Here is how those commands become tools while the existing slash commands continue to work:
+Neko is a Discord bot with slash commands for event management: `/event`, `/event-list`, `/event-delete`, `/set-reminder-timezone`, and `/set-reminder-channel`. This walkthrough adds Dango so users can invoke the same functionality through natural language — while every existing slash command keeps working unchanged.
+
+### Step 1 — Install Dango
+
+Run this in the Neko project directory:
+
+```bash
+uv add git+https://github.com/zhiro-labs/dango
+```
+
+### Step 2 — Configure `.env`
+
+Add to Neko's `.env`:
+
+```env
+# LLM provider
+FAST_MODEL=google:gemini-2.0-flash
+FAST_API_KEY=your_api_key_here
+
+# System prompt path
+CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
+```
+
+### Step 3 — Create the system prompt
+
+Create `config/chat_sys_prompt.txt`:
+
+```
+You are Neko, a Discord event reminder assistant.
+You can help users create events, list upcoming events, delete events,
+and configure the reminder timezone and channel.
+```
+
+### Step 4 — Create `neko_tools.py`
+
+This file wraps each command's logic as an Agno tool. Neko's original slash commands are not touched.
 
 ```python
 # neko_tools.py
@@ -371,7 +406,7 @@ from dango.tools import (
     check_permissions, set_ephemeral, set_discord_response,
 )
 import db
-from main import parse_date, parse_time, reminder_delta, discord_ts, REMINDER_OPTIONS, EventView
+from main import parse_date, parse_time, reminder_delta, discord_ts, EventView
 
 
 @discord_tool(name="set_reminder_timezone")
@@ -387,6 +422,17 @@ async def set_reminder_timezone(timezone: str, run_context: RunContext) -> str:
     db.set_timezone(ctx["guild_id"], timezone)
     set_ephemeral(run_context)
     return f"Server timezone set to `{timezone}`."
+
+
+@discord_tool(name="set_reminder_channel")
+async def set_reminder_channel(run_context: RunContext) -> str:
+    """Set the current channel as the reminder channel."""
+    if err := check_permissions(run_context, any_of=["manage_guild"]):
+        return err
+    ctx = get_discord_context(run_context)
+    db.set_reminder_channel(ctx["guild_id"], ctx["channel_id"])
+    set_ephemeral(run_context)
+    return f"Reminder channel set to <#{ctx['channel_id']}>."
 
 
 @discord_tool(name="list_events")
@@ -431,19 +477,23 @@ async def create_event_with_ui(title: str, date: str, time: str, run_context: Ru
     bot = get_discord_bot(run_context)
 
     parsed_date = parse_date(date)
-    parsed_time = parse_time(time)
-    if not parsed_date or not parsed_time:
+    parsed_time_val = parse_time(time)
+    if not parsed_date or not parsed_time_val:
         return "❌ Invalid date or time format."
 
     from zoneinfo import ZoneInfo
     tz = ZoneInfo(db.get_timezone(ctx["guild_id"]))
-    event_dt = parsed_date.replace(hour=parsed_time[0], minute=parsed_time[1], tzinfo=tz)
+    event_dt = parsed_date.replace(hour=parsed_time_val[0], minute=parsed_time_val[1], tzinfo=tz)
 
     reminder_channel_id = db.get_reminder_channel(ctx["guild_id"])
+    if not reminder_channel_id:
+        return "⚠️ No reminder channel configured. Use `/set-reminder-channel` first."
+
     channel = bot.get_channel(ctx["channel_id"])
     creator = bot.get_guild(ctx["guild_id"]).get_member(ctx["author_id"])
 
-    # Use Neko's native EventView — it manages selection state internally.
+    # EventView is Neko's native discord.ui.View — it manages role/reminder
+    # selection state internally through Python callbacks.
     view = EventView(
         title=title, date=event_dt,
         announce_channel=channel,
@@ -456,44 +506,90 @@ async def create_event_with_ui(title: str, date: str, time: str, run_context: Ru
     )
     set_discord_response(run_context, suppress_text=True)
     return ""
+
+
+@discord_tool(name="delete_event")
+async def delete_event(event_title: str, run_context: RunContext) -> str:
+    """Delete an upcoming event by title.
+
+    Args:
+        event_title (str): Title of the event to delete (partial match supported)
+    """
+    ctx = get_discord_context(run_context)
+    reminder_channel_id = db.get_reminder_channel(ctx["guild_id"])
+    if not reminder_channel_id:
+        return "⚠️ No reminder channel configured."
+
+    events = db.get_upcoming_events(reminder_channel_id)
+    matches = [e for e in events if event_title.lower() in e.title.lower()]
+    if not matches:
+        return f"❌ No event found matching \"{event_title}\"."
+    if len(matches) > 1:
+        titles = "\n".join(f"• {e.title}" for e in matches)
+        return f"Multiple matches found, please be more specific:\n{titles}"
+
+    db.delete_event(matches[0].event_id)
+    return f"✅ Deleted \"{matches[0].title}\" and cancelled all reminders."
 ```
 
-Add to `.env`:
+### Step 5 — Update `main.py`
 
-```env
-CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
-```
-
-Create `config/chat_sys_prompt.txt`:
-
-```
-You are Neko, a Discord event reminder assistant.
-You can help users create events, list upcoming events, delete events,
-and configure the reminder timezone and channel.
-```
-
-Then in `on_ready` or `setup_hook` — add alongside existing commands:
+Add the imports near the top:
 
 ```python
 import os
 from dango.commands import ChatCog
 from dango.workflow import create_discord_workflow
 from dango.utils.runtime_config import RuntimeConfig
-from neko_tools import set_reminder_timezone, list_events, create_event_with_ui
+from neko_tools import (
+    set_reminder_timezone, set_reminder_channel,
+    list_events, create_event_with_ui, delete_event,
+)
+```
 
+At the end of `on_ready`, add:
+
+```python
 with open(os.getenv("CHAT_SYS_PROMPT_PATH", "config/chat_sys_prompt.txt"), encoding="utf-8") as f:
     chat_system_prompt = f.read()
 
 workflow = create_discord_workflow()
 runtime_config = RuntimeConfig("config/runtime.yml")
-
 await bot.add_cog(ChatCog(
-    bot, workflow, chat_system_prompt, runtime_config,
-    extra_tools=[set_reminder_timezone, list_events, create_event_with_ui],
+    bot,
+    workflow,
+    chat_system_prompt,
+    runtime_config,
+    extra_tools=[
+        set_reminder_timezone,
+        set_reminder_channel,
+        list_events,
+        create_event_with_ui,
+        delete_event,
+    ],
 ))
 ```
 
-Users can now use `/event` as before **and** say "Create a Python book club event on June 7th at 7pm" in natural language.
+### Step 6 — Allow channels
+
+Start the bot, then in each channel where you want natural-language responses, run:
+
+```
+/allow
+```
+
+This is Dango's built-in admin command. It adds the current channel to the allowed list stored in `config/runtime.yml`.
+
+### Result
+
+All original slash commands keep working. Users can now also interact in plain English:
+
+| User says | Agent calls |
+|-----------|-------------|
+| "list upcoming events" | `list_events()` → embed |
+| "create a Python study group on June 7th at 7pm" | `create_event_with_ui()` → EventView UI |
+| "delete the study group event" | `delete_event("study group")` |
+| "set timezone to Asia/Tokyo" | `set_reminder_timezone("Asia/Tokyo")` |
 
 ---
 
