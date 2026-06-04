@@ -18,7 +18,7 @@ class BotConfig(BaseModel):
     deep_api_key: str = ""  # falls back to fast_api_key if empty
 
     # ── Models ───────────────────────────────────────────────────────────────
-    fast_model: str = "google:gemma-4-26b-a4b-it"
+    fast_model: str = ""
     fast_base_url: str = ""  # custom endpoint (e.g. http://host.docker.internal:11434)
     deep_model: str = ""
     deep_base_url: str = ""
@@ -92,4 +92,4 @@ def save_config(config: BotConfig) -> None:
 
 def is_setup_complete() -> bool:
     c = load_config()
-    return bool(c.discord_token and c.fast_api_key)
+    return bool(c.discord_token and c.fast_api_key and c.fast_model)

@@ -95,7 +95,12 @@ def _inject_provider_key(model_str: str, api_key: str | None) -> None:
 
 
 # ── Model identity ─────────────────────────────────────────────────────────────
-FAST_MODEL = os.getenv("FAST_MODEL", "google:gemma-4-26b-a4b-it")
+FAST_MODEL = os.getenv("FAST_MODEL") or ""
+if not FAST_MODEL:
+    raise RuntimeError(
+        "FAST_MODEL is not set. Configure it in the Web GUI (Models tab) or set the "
+        "FAST_MODEL environment variable (e.g. 'google:gemini-2.0-flash')."
+    )
 FAST_API_KEY = os.getenv("FAST_API_KEY")
 FAST_BASE_URL = os.getenv("FAST_BASE_URL")  # optional custom endpoint for local/proxied models
 

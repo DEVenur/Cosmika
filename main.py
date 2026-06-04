@@ -41,11 +41,13 @@ _setup_log_tee()
 
 from dotenv import load_dotenv
 
-# Both load_dotenv() and inject_config_to_env() must run before local imports —
+# Both load_dotenv() and inject_config_to_env() must run before any dango imports —
+# importing dango triggers dango/__init__.py which pulls in call_agent.py, and
 # call_agent.py reads FAST_MODEL, GEMINI_*, AUTO_ROUTE, etc. at module level.
+# app_config is a top-level module (not inside dango/) so importing it is safe here.
 load_dotenv()
 
-from dango.app_config import inject_config_to_env
+from app_config import inject_config_to_env
 _chat_sys_prompt_inline = inject_config_to_env()  # None when using .env (developer path)
 
 import discord
