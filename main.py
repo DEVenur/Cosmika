@@ -132,7 +132,7 @@ def main():
     print(f"🔑 Discord token loaded: {'✅' if DISCORD_BOT_TOKEN else '❌'}")
     print(f"🤖 Fast model: {FAST_MODEL}")
     print(f"🌡️ Chat temperature: {os.getenv('GEMINI_TEMPERATURE', '(default)')}")
-    print(f"📄 Chat system prompt path: {CHAT_SYS_PROMPT_PATH}")
+    print(f"📄 Chat system prompt path: {CHAT_SYS_PROMPT_PATH or '(inline from GUI)'}")
     print(f"🔌 Contextual system prompt: {ENABLE_CONTEXTUAL_SYSTEM_PROMPT}")
     print("🔌 Starting Discord bot...")
     bot.run(DISCORD_BOT_TOKEN)
