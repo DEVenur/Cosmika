@@ -35,3 +35,7 @@ workspace/*
 
 # Web GUI data directory (contains secrets, never commit)
 data/
+
+# MkDocs build output (deploy via mkdocs gh-deploy, not committed to main)
+site/
+docs/assets/
