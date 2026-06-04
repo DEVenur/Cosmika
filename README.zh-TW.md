@@ -27,7 +27,7 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 已經有 Discord Bot 了嗎？
 
 - **可嵌入** — 整個功能是標準 discord.py Cog，幾行程式碼就能把 Dango 的 Agent 和 slash commands 塞進現有 Bot。
-- **指令變工具** — 用 `@discord_tool` 包裝你 Bot 現有的指令，Agent 就能代替使用者呼叫它們。你原本的 `!play` / `/play` 完全不受影響。
+- **指令變工具** — 用 `@discord_tool` 包裝你 Bot 現有的指令，Agent 就能代替使用者呼叫它們。原本的指令完全不受影響——舉例來說，`!play` / `/play` 還是照常運作，但使用者現在也可以直接說「放點輕音樂」，Agent 自己決定什麼時候呼叫。
 
 ## 開始之前
 
