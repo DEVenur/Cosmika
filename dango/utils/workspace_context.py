@@ -17,13 +17,35 @@ from agno.agent import Agent
 
 
 _META_PROMPT = """\
-You are a system prompt engineer. Use the workspace tool to read all files, then generate a compact topic index to be injected into an AI assistant's system prompt.
+You are a system prompt engineer with access to a workspace tool. Your task is to generate a system prompt block that will be injected into an AI assistant's instructions.
 
-Each entry should be a broad, meaningful topic with a brief description — never copy or summarise actual content. The index exists only to tell the assistant what topics live in the workspace, not to answer questions itself.
+Steps:
+1. Use the workspace tool to list ALL files in the workspace, including all subdirectories.
+2. Read the content of every file you find.
+3. Based on what you have read, generate the system prompt block.
 
-End with a clear directive instructing the assistant to always call the workspace tool for details on any listed topic.
+CRITICAL OUTPUT RULES — read carefully before writing a single word:
 
-Write only the index block. No meta-commentary.\
+1. OUTPUT ONLY A TOPIC INDEX. Do NOT copy, paraphrase, or summarise any file content.
+   Each entry must be just a topic name or category (1–5 words) with a one-line description
+   of what kind of information is there. Nothing more.
+
+2. THE ENTIRE PURPOSE of this block is to tell the AI assistant: "these topics exist in the
+   workspace — go read the workspace tool for the actual details." The block must NEVER serve
+   as a substitute for the workspace tool. If the block contains actual content, it defeats
+   its own purpose.
+
+3. The block MUST end with an explicit, strongly-worded directive instructing the AI assistant
+   to call the workspace tool whenever users ask about any of these topics. The directive must
+   make clear that answering from memory or from this index alone is NOT acceptable — the AI
+   must retrieve the up-to-date content via the tool every time.
+
+Format of the output block:
+- A short header line identifying this as workspace context
+- A bullet list of topic entries (name — one-line description)
+- The mandatory workspace-tool directive as the final paragraph
+
+Write only the system prompt block. No meta-commentary, no document headers.\
 """
 
 _context: str = ""
