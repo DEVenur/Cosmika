@@ -1,79 +1,320 @@
 # 🍡 Dango — Discord AI Agent
 
-把任何 AI 模型接進你的 Discord，五分鐘搞定。
+Connect any AI model to your Discord server in minutes.
 
-Gemini、GPT-4o、Claude、Llama、本地的 Ollama——通通支援，切換只要改一行設定。不需要重啟，不需要動程式碼，在 Discord 下指令就能調整一切。
+Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers by changing one line. No restarts, no code changes, everything configurable live from Discord slash commands.
 
-**[📖 完整文件](https://zhiro-labs.github.io/dango)** · [快速開始](#setup) · [功能介紹](#features)
-
----
-
-## Why Dango?
-
-大多數 Discord AI Bot 只綁定一家服務商，換模型就要重寫。Dango 不一樣——它把 provider 跟邏輯分開，今天用免費的 Gemma，明天換成 GPT-4o，後天跑本地 Ollama，設定一改即生效。
-
-幾個讓人用了就回不去的功能：
-
-- **雙模型路由** — 簡單問題走快模型省錢，複雜問題自動切深度模型。[了解更多 →](https://zhiro-labs.github.io/dango/features/models/)
-- **Table 變圖片** — Bot 回覆的 Markdown 表格自動渲染成 PNG，手機上也看得清楚（支援中日韓字型）
-- **Workspace 知識庫** — 把資料夾掛進去，Bot 就能查你的自訂資料，不用每次貼給它
-- **瀏覽器設定介面** — Docker 啟動後開 `localhost:17860`，什麼都能改，完全不用碰終端機
-- **可嵌入任何 Bot** — 整個 Agent 是標準 discord.py Cog，三行程式碼塞進你現有的 Bot
+**[📖 Full Documentation](https://zhiro-labs.github.io/dango)** · [中文版 README](README.zh-TW.md)
 
 ---
+
+## What it can do
+
+- **Use any AI provider** — set `FAST_MODEL` to `provider:model_id` (e.g. `google:gemini-2.5-flash`, `openai:gpt-4o`, `anthropic:claude-sonnet-4-20250514`, `groq:llama-3.3-70b-versatile`) and the bot figures out the right SDK and API key automatically.
+- **Run locally** — point `FAST_MODEL` at a local Ollama or LM Studio instance and set `FAST_BASE_URL` to its address. Running the bot in Docker while the model server is on the host? Use `http://host.docker.internal:<port>` and it just works.
+- **Fast + deep model pairing** — set up a cheap fast model for everyday questions and a powerful deep model for complex ones. `AUTO_ROUTE=on` switches automatically; `/deep` forces the deep model for a single message.
+- **Handles errors gracefully** — retries on transient failures and falls back to your deep model when the fast one is down.
+- **Understands images** — users can attach images to their messages; the bot passes them straight to the model.
+- **Gets reply context** — when someone replies to a Discord message, the quoted content is woven into the prompt naturally.
+- **Renders tables** — any markdown table in the bot's reply is auto-converted to a PNG image (with CJK font support).
+- **No restarts needed** — channels, users, history limit, timezone, and activity status are all adjustable live via slash commands.
+- **Fresh start anytime** — `/newchat` drops a marker so the bot ignores everything before it.
+- **Workspace file access** — mount a local folder so the bot can look up files on demand (great for custom game data, knowledge bases, etc.)
+- **DuckDuckGo search** — free web search that works with any model provider (`ENABLE_DUCKDUCKGO=on`, no API key needed).
+- **Website tool** — lets the bot fetch and read URLs from the conversation, for any provider.
+- **Custom API tools** — plug any HTTP API into the bot through the web dashboard; no code changes needed.
+- **SQL database tools** — add a database connection string in the dashboard and the bot gets `list_tables` + `run_query` tools automatically.
+- **Embeddable** — the whole thing is a standard discord.py Cog; drop it into any existing bot in a few lines. [Learn more →](https://zhiro-labs.github.io/dango/advanced/embedding/)
+
+## Before you start
+
+You'll need:
+- A Discord bot token ([Discord Developer Portal](https://discord.com/developers/applications))
+- An API key for whatever model provider you want to use (e.g. [Google AI Studio](https://aistudio.google.com), [OpenAI Platform](https://platform.openai.com/api-keys), [Anthropic Console](https://console.anthropic.com))
+
+| Method | Extra requirements |
+|---|---|
+| Docker (recommended) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac/Windows), [OrbStack](https://orbstack.dev) (Mac), or [Docker Engine](https://docs.docker.com/engine/install/) (Linux) |
+| uv (developers / low-spec machines) | Python 3.12+, [uv](https://github.com/astral-sh/uv) |
+
+## Discord Application Setup
+
+### 1. Create a Bot
+
+Follow the [Discord Quick Start guide](https://discord.com/developers/docs/quick-start/getting-started#step-1-creating-an-app) to create a new application and bot. Copy the **Bot Token** — you'll need it in a moment.
+
+### 2. Enable Privileged Gateway Intents
+
+Go to your application → **Bot** → **Privileged Gateway Intents** and turn on both of these:
+
+| Intent | Why |
+|---|---|
+| **Server Members Intent** | Needed to read user display names |
+| **Message Content Intent** | Needed to read message text |
+
+### 3. Invite the Bot
+
+When generating an invite link (**OAuth2 → URL Generator**), include these permissions:
+
+| Category | Permission |
+|---|---|
+| General | View Channels |
+| Text | Send Messages |
+| Text | Attach Files |
+| Text | Read Message History |
 
 ## Setup
 
-需要準備：Discord Bot Token（[怎麼建？](https://zhiro-labs.github.io/dango/getting-started/discord-setup/)）+ 任意 AI provider 的 API Key。
+Get your Bot Token from [Discord Application Setup](#discord-application-setup) first, then pick one of the options below.
 
-### 🐳 Docker（推薦）
+> [!TIP]
+> First time running commands on a computer? Read [Running commands for the first time](#running-commands-for-the-first-time) below before picking an option — it takes 2 minutes.
 
-```bash
-curl -O https://raw.githubusercontent.com/zhiro-labs/dango/main/docker-compose.yml
-docker compose up -d
+### Running commands for the first time
+
+<details>
+<summary>Click to expand — even if you've never typed a command before, this takes 2 minutes</summary>
+
+Every option in this guide requires typing a few commands into a text window on your computer. A command window (called a "terminal", "shell", "command prompt", or "PowerShell" depending on the system) lets you control your computer by typing instead of clicking. You only need the basics.
+
+**Opening the terminal**
+
+| System | How |
+|---|---|
+| macOS | ⌘ Space → type `Terminal` → Enter |
+| Windows | Win key → type `Terminal` or `PowerShell` → Enter |
+| Linux | Ctrl + Alt + T |
+
+**Your computer is a tree of folders**
+
+```
+~ (your home folder)
+├── Downloads/
+│   └── dango/        ← you'll work here
+├── Documents/
+└── Desktop/
 ```
 
-開啟 `http://localhost:17860`，跟著設定精靈走就好。[完整說明 →](https://zhiro-labs.github.io/dango/getting-started/docker/)
+**`cd` — moving between folders**
 
-### 🐍 uv（開發者）
+| Action | macOS / Linux | Windows (PowerShell) |
+|---|---|---|
+| Go into a folder | `cd Downloads` | `cd Downloads` |
+| Go up one level | `cd ..` | `cd ..` |
+| Jump straight there | `cd ~/Downloads/dango` | `cd ~\Downloads\dango` |
+
+That's it. `cd` to the right folder, then copy-paste the commands.
+
+</details>
+
+---
+
+### Option 1: Let an AI set it up for you (easiest)
+
+No special tools needed — paste the prompt below into any AI assistant:
+
+| Assistant | How it helps |
+|---|---|
+| [Claude](https://claude.ai), [ChatGPT](https://chatgpt.com), [Grok](https://grok.com) | Guides you step by step — you copy-paste each command into your terminal |
+| [Claude Code](https://claude.ai/code), Codex | Runs commands directly on your computer for you |
+
+<details>
+<summary>Click to show the prompt</summary>
+
+```
+I want to install the Dango Discord bot using Docker. Please go through these steps one at a time and explain what each command does before running it:
+
+1. Check that Docker is installed and running (docker info). If not, stop and tell me to install it from https://docs.docker.com/get-docker/ before continuing.
+2. Ask me where to create the project folder (suggest ~/dango as the default).
+3. Create that folder and move into it.
+4. Download the setup file: curl -O https://raw.githubusercontent.com/zhiro-labs/dango/main/docker-compose.yml
+5. Show me the contents of docker-compose.yml before doing anything else.
+6. Start the bot: docker compose up -d
+7. Confirm both the "web" and "bot" containers are running: docker compose ps
+8. Tell me to open http://localhost:17860 in my browser to finish setup.
+
+Important: do NOT ask for, store, or touch any Discord tokens or API keys — the web setup wizard handles all credentials. Do not run any commands that delete files.
+```
+
+</details>
+
+---
+
+### Option 2: Docker (recommended)
+
+No Python required — everything runs in a container and you configure it through the browser.
+
+**1. Download `docker-compose.yml`**
 
 ```bash
-git clone https://github.com/zhiro-labs/dango && cd dango
+cd ~/Downloads       # or wherever you'd like
+curl -O https://raw.githubusercontent.com/zhiro-labs/dango/main/docker-compose.yml
+```
+
+**2. Start it up**
+
+```bash
+docker compose up -d && docker compose logs -f
+```
+
+`-d` starts the containers in the background; `logs -f` streams their output to your terminal. Press Ctrl+C to stop watching the logs — the containers keep running.
+
+**3. Open the browser**
+
+Head to `http://localhost:17860`. The Setup Wizard will ask for your Discord Token, model API key, and bot personality. Once you save, the bot connects to Discord automatically.
+
+---
+
+### Option 3: uv (developers / low-spec machines)
+
+**AI-assisted** — paste this into any AI assistant to have it walk you through the steps:
+
+<details>
+<summary>Click to show the prompt</summary>
+
+```
+I want to install the Dango Discord bot using uv (a Python package manager). Please go through these steps one at a time and explain what each command does before running it:
+
+1. Check that git is installed (git --version). If not, stop and tell me to install it from https://git-scm.com/downloads
+2. Check that uv is installed (uv --version). If not, install it automatically:
+   - Mac/Linux: curl -LsSf https://astral.sh/uv/install.sh | sh
+   - Windows: tell me to visit https://docs.astral.sh/uv/getting-started/installation/
+3. Ask me where to clone the project (suggest ~/dango as the default).
+4. Clone and enter the folder:
+   git clone https://github.com/zhiro-labs/dango <chosen-folder>
+   cd <chosen-folder>
+5. Install dependencies: uv sync
+6. Copy the example config files:
+   cp .env.example .env
+   cp config/runtime.yml.example config/runtime.yml
+   cp config/chat_sys_prompt.txt.example config/chat_sys_prompt.txt
+7. Tell me exactly which values to fill in inside .env (DISCORD_BOT_TOKEN, FAST_API_KEY, FAST_MODEL, CHAT_SYS_PROMPT_PATH) and what each one means. Wait for me to confirm I've filled them in before continuing.
+8. Start the bot: uv run main.py
+
+Important: do NOT read, display, log, or store the contents of .env — it contains my API keys and tokens. Only tell me which variables to fill in and what they mean.
+```
+
+</details>
+
+Or follow the steps manually:
+
+**1. Clone and install**
+
+```bash
+cd ~/Downloads       # or wherever you'd like
+git clone https://github.com/zhiro-labs/dango
+cd dango
 uv sync
-cp .env.example .env  # 填入 DISCORD_BOT_TOKEN、FAST_MODEL、FAST_API_KEY
+```
+
+**2. Set up your `.env`**
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in at least these four:
+
+```env
+DISCORD_BOT_TOKEN=your_discord_token
+FAST_API_KEY=your_api_key
+FAST_MODEL=google:gemma-4-26b-a4b-it   # format: provider:model_id
+CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
+```
+
+**3. Copy the config files**
+
+```bash
+cp config/runtime.yml.example config/runtime.yml
+cp config/chat_sys_prompt.txt.example config/chat_sys_prompt.txt
+```
+
+Edit `config/chat_sys_prompt.txt` to give the bot its personality.
+
+**4. Run**
+
+```bash
 uv run main.py
 ```
 
-[完整說明 →](https://zhiro-labs.github.io/dango/getting-started/uv/)
+The first time you run it, the Noto Sans CJK font (~100 MB) downloads automatically for table rendering.
 
----
+## Stopping & restarting
 
-## Features
+### Docker
 
-| 功能 | 說明 |
+```bash
+docker compose stop    # pause (keeps your data)
+docker compose start   # resume
+```
+
+To fully remove containers (e.g. to start fresh): `docker compose down` — your data stays safe, but use `docker compose up -d` to bring it back.
+
+> [!NOTE]
+> **Computer restarted?** The containers don't come back automatically. `cd` into the folder with `docker-compose.yml` and run `docker compose start`.
+
+### uv
+
+**Stop:** Ctrl+C in the terminal running `uv run main.py`.
+
+**Start again:**
+```bash
+uv run main.py
+```
+
+## Updating
+
+### Docker
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Your data (`data/`, `config/`, `workspace/`) lives in a volume and won't be touched.
+
+### uv
+
+```bash
+git pull && uv sync
+```
+
+Then restart the bot. `.env` and `config/` won't be overwritten.
+
+## Usage
+
+### Starting a conversation
+
+| How | What to do |
 |---|---|
-| 任意 AI Provider | `google:gemini-2.5-flash`、`openai:gpt-4o`、`anthropic:claude-sonnet-4`、`ollama:llama3.2`… |
-| 雙模型 AUTO_ROUTE | 複雜度自動分流，`/deep` 強制用深度模型 |
-| 本地模型 | Ollama / LM Studio / vLLM，設 `FAST_BASE_URL` 即可 |
-| 圖片理解 | 附圖直接送給模型 |
-| 網路搜尋 | DuckDuckGo（免費）或 Gemini 原生 Google Search |
-| Custom API / SQL | 在 Dashboard 貼 URL 就能讓 Bot 呼叫你的 API 或查資料庫 |
-| 無重啟設定 | 頻道、用戶、歷史長度、時區——全部 slash command 即時調整 |
+| **Mention** | `@BotName hello!` in any channel the bot can see |
+| **Allowed channel** | Just send a message — no mention needed if the channel is in the allowed list (`/addchannel`) |
+| **Direct Message** | DM the bot directly (your user ID needs to be added first with `/adduser`) |
 
-[→ 完整功能說明](https://zhiro-labs.github.io/dango/features/models/)
+Use `/newchat` to drop a session marker and start fresh. The bot ignores everything before that point.
 
----
+### Slash Commands
 
-## 文件
+| Command | What it does |
+|---|---|
+| `/newchat` | Reset conversation history |
+| `/deep <message>` | Force the deep model for one message |
+| `/addchannel` / `/removechannel` | Manage allowed channels (admin) |
+| `/adduser` / `/removeuser` | Manage DM allowlist (admin) |
+| `/sethistorylimit <n>` | Set context window in messages (admin) |
+| `/settimezone <tz>` | Set bot timezone with autocomplete (admin) |
+| `/setactivity <text>` | Set Discord activity status (admin) |
+
+[→ Full slash command reference](https://zhiro-labs.github.io/dango/usage/commands/)
+
+## Documentation
 
 **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)**
 
 | | |
 |---|---|
-| [Discord 設定](https://zhiro-labs.github.io/dango/getting-started/discord-setup/) | [環境變數參考](https://zhiro-labs.github.io/dango/configuration/env-vars/) |
-| [Docker 安裝](https://zhiro-labs.github.io/dango/getting-started/docker/) | [Slash Commands](https://zhiro-labs.github.io/dango/usage/commands/) |
-| [模型 & 路由](https://zhiro-labs.github.io/dango/features/models/) | [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) |
-| [工具（搜尋 / API / SQL）](https://zhiro-labs.github.io/dango/features/tools/) | [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) |
+| [Environment Variables](https://zhiro-labs.github.io/dango/configuration/env-vars/) | [Model Providers & Routing](https://zhiro-labs.github.io/dango/features/models/) |
+| [Tools (search / API / SQL)](https://zhiro-labs.github.io/dango/features/tools/) | [Embedding into Another Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) |
+| [Workflow Architecture](https://zhiro-labs.github.io/dango/features/workflow/) | [VPS Deployment](https://zhiro-labs.github.io/dango/advanced/vps/) |
 
 ---
 
