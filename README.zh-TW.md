@@ -75,6 +75,8 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 
 ### 第一次使用終端機
 
+> **提示：** 個人推薦使用 [Warp](https://www.warp.dev/) — 內建自動補全與 AI 輔助的現代終端機，比任何系統預設的終端機都好用。
+
 <details>
 <summary>點開展開 — 就算完全沒用過，2 分鐘就夠了</summary>
 
