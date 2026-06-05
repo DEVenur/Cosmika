@@ -1,8 +1,8 @@
 # 🍡 Dango — Discord AI Agent
 
-把任何 AI 模型接進你的 Discord，五分鐘搞定。
+**開源的 Discord AI Bot 與 Agent**——把任何 AI 模型接進你的 Discord，五分鐘搞定。
 
-Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型只要改一行設定。不需要重啟，不需要動程式碼，在 Discord 下指令就能調整一切。
+Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型只要改一行設定，重啟 Bot 就生效。不需要動程式碼——頻道、用戶白名單、Bot 行為都可以透過 Discord 指令即時調整。
 
 **[📖 完整文件](https://zhiro-labs.github.io/dango)** · [English README](README.md)
 
@@ -330,7 +330,10 @@ uv add git+https://github.com/zhiro-labs/dango
 | `/newchat` | 重置對話歷史 |
 | `/deep <訊息>` | 強制使用深度模型回覆這則訊息 |
 | `/addchannel` / `/removechannel` | 管理允許頻道（需管理員） |
+| `/listchannels` | 列出本伺服器所有允許的頻道（需管理員） |
 | `/adduser` / `/removeuser` | 管理私訊白名單（需管理員） |
+| `/listusers` | 列出所有可以私訊 Bot 的使用者（需管理員） |
+| `/refreshmetadata` | 重新整理設定檔中的頻道與使用者名稱（需管理員） |
 | `/sethistorylimit <n>` | 設定上下文訊息數量（需管理員） |
 | `/settimezone <時區>` | 設定 Bot 時區，支援自動補全（需管理員） |
 | `/setactivity <文字>` | 設定 Discord 狀態訊息（需管理員） |

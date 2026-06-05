@@ -1,3 +1,12 @@
+---
+description: "Embed Dango's AI agent into any existing discord.py bot. Load the Cogs, wrap your commands with @discord_tool, and add natural-language control without breaking existing functionality."
+tags:
+  - Advanced
+  - Embedding
+  - discord.py
+  - Developers
+---
+
 # Embedding into Another Bot
 
 Dango's agent lives in a standard discord.py Cog, so you can drop it into any existing bot. The bot keeps all its slash commands and prefix commands; Dango adds a natural-language layer on top.

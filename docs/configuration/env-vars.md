@@ -1,3 +1,11 @@
+---
+description: "Complete reference for all Dango environment variables — model provider settings, dual-model routing, tool toggles, Gemini thinking mode, history limits, and more."
+tags:
+  - Configuration
+  - Environment Variables
+  - Reference
+---
+
 # Environment Variables
 
 Configuration lives in `.env` (uv path) or `data/config.yaml` (Docker / web dashboard). Both map to the same environment variables described here.

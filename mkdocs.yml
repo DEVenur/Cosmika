@@ -1,11 +1,14 @@
 site_name: Dango
-site_description: Discord AI Agent powered by Agno
+site_description: "Open-source Discord AI bot — connect Gemini, GPT-4o, Claude, Llama, or Ollama to your Discord server in minutes. Web UI setup, slash commands, tools, and no restarts needed."
 site_url: https://zhiro-labs.github.io/dango
 repo_url: https://github.com/zhiro-labs/dango
 repo_name: zhiro-labs/dango
+site_author: zhiro-labs
+copyright: "© 2025 zhiro-labs · <a href='https://github.com/zhiro-labs/dango/blob/main/LICENSE'>MIT License</a>"
 
 theme:
   name: material
+  language: en
   palette:
     - scheme: default
       primary: deep purple
@@ -31,6 +34,7 @@ theme:
 
 plugins:
   - search
+  - tags
   - copy-to-llm:
       repo_url: "https://raw.githubusercontent.com/zhiro-labs/dango/main"
 
@@ -46,6 +50,12 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/zhiro-labs/dango
+      name: Dango on GitHub
 
 nav:
   - Home: index.md
@@ -69,3 +79,4 @@ nav:
   - Reference:
     - API Reference: reference/api.md
     - Troubleshooting: troubleshooting.md
+    - Tags: tags.md

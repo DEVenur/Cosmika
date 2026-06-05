@@ -1,3 +1,12 @@
+---
+description: "Install and run Dango Discord AI bot with uv — the recommended path for developers. Clone the repo, install dependencies, configure .env, and start the bot directly."
+tags:
+  - Getting Started
+  - uv
+  - Installation
+  - Developers
+---
+
 # uv Setup
 
 The uv path is for developers or anyone who prefers running the bot directly without Docker.

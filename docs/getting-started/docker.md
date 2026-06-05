@@ -1,3 +1,11 @@
+---
+description: "Install Dango Discord AI bot with Docker in minutes — no Python required. Pull the image, start with docker compose, and configure via the browser-based setup wizard."
+tags:
+  - Getting Started
+  - Docker
+  - Installation
+---
+
 # Docker Setup
 
 The Docker path requires no Python installation. Everything runs in a container and you configure it through the browser.

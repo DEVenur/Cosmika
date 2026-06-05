@@ -1,3 +1,11 @@
+---
+description: "How Dango processes Discord messages: a four-step Agno Workflow that fetches history, calls the AI agent, renders tables as images, and sends the response back."
+tags:
+  - Architecture
+  - Agno
+  - Workflow
+---
+
 # Workflow Architecture
 
 Every message runs through a four-step [Agno Workflow](https://docs.agno.com/workflows/overview):

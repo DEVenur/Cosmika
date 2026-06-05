@@ -1,3 +1,12 @@
+---
+description: "Extend Dango with web search (DuckDuckGo), URL fetching, workspace file access, custom HTTP API tools, and SQL database queries — all configurable from the web dashboard."
+tags:
+  - Tools
+  - Web search
+  - SQL
+  - Custom APIs
+---
+
 # Tools
 
 ## Web Search (DuckDuckGo)

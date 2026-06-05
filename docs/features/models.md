@@ -1,3 +1,13 @@
+---
+description: "Connect Dango to any AI provider — Gemini, GPT-4o, Claude, Llama, Groq, Ollama, and more. Supports dual-model routing, automatic provider detection, and local model servers."
+tags:
+  - Models
+  - Gemini
+  - GPT-4o
+  - Claude
+  - Ollama
+---
+
 # Model Providers & Routing
 
 ## Provider Format

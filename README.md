@@ -1,8 +1,8 @@
 # 🍡 Dango — Discord AI Agent
 
-Connect any AI model to your Discord server in minutes.
+An **open-source Discord AI bot** and agent — connect any AI model to your Discord server in minutes.
 
-Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers by changing one line. No restarts, no code changes, everything configurable live from Discord slash commands.
+Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers by changing one line and restarting. No code changes — channels, users, and bot behaviour are all configurable live from Discord slash commands.
 
 **[📖 Full Documentation](https://zhiro-labs.github.io/dango)** · [中文版 README](README.zh-TW.md)
 
@@ -330,7 +330,10 @@ Use `/newchat` to drop a session marker and start fresh. The bot ignores everyth
 | `/newchat` | Reset conversation history |
 | `/deep <message>` | Force the deep model for one message |
 | `/addchannel` / `/removechannel` | Manage allowed channels (admin) |
+| `/listchannels` | List all channels where the bot is allowed in this server (admin) |
 | `/adduser` / `/removeuser` | Manage DM allowlist (admin) |
+| `/listusers` | List all users allowed to DM the bot (admin) |
+| `/refreshmetadata` | Refresh channel and user names in config comments (admin) |
 | `/sethistorylimit <n>` | Set context window in messages (admin) |
 | `/settimezone <tz>` | Set bot timezone with autocomplete (admin) |
 | `/setactivity <text>` | Set Discord activity status (admin) |

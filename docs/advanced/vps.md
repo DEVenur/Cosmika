@@ -1,3 +1,12 @@
+---
+description: "Deploy Dango Discord AI bot to a VPS with Docker. Includes SSH tunneling to secure the web dashboard, systemd service setup, and firewall configuration."
+tags:
+  - Advanced
+  - VPS
+  - Deployment
+  - Self-hosting
+---
+
 # VPS Deployment
 
 The Docker setup works on any VPS. The one thing to be careful about: **the web dashboard has no login screen**.
