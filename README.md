@@ -75,6 +75,8 @@ Get your Bot Token from [Discord Application Setup](#discord-application-setup) 
 
 ### Running commands for the first time
 
+> **Tip:** I personally recommend [Warp](https://www.warp.dev/) — a modern terminal with autocomplete and AI assistance built in. Much nicer than the default terminal on any OS.
+
 <details>
 <summary>Click to expand — even if you've never typed a command before, this takes 2 minutes</summary>
 
