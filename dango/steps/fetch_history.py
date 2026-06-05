@@ -12,7 +12,7 @@ from agno.media import Image
 from agno.models.message import Message
 from agno.workflow import StepInput, StepOutput
 
-from ..utils.discord_helpers import ROLE_MENTION_RE, SYSINFO_MARKER, USER_MENTION_RE, resolve_mentions
+from ..utils.discord_helpers import ROLE_MENTION_RE, SYSINFO_MARKER, USER_MENTION_RE, format_reply_context, resolve_mentions
 
 
 async def fetch_and_process_history(step_input: StepInput) -> StepOutput:
@@ -77,9 +77,10 @@ async def fetch_and_process_history(step_input: StepInput) -> StepOutput:
         table_content_map = await _extract_table_attachments(msgs)
         deep_map = await _extract_deep_attachments(msgs)
         image_map = await _download_image_attachments(msgs, bot_user_id)
-        mention_map = await _build_mention_map(msgs)
+        reply_map, extra_msgs = await _build_reply_map(msgs, channel, bot_user_id)
+        mention_map = await _build_mention_map(msgs + extra_msgs)
         formatted_history, unique_users = _process_messages(
-            msgs, bot_user_id, table_content_map, image_map, deep_map, mention_map
+            msgs, bot_user_id, table_content_map, image_map, deep_map, mention_map, reply_map
         )
 
         return StepOutput(
@@ -241,6 +242,45 @@ async def _build_mention_map(msgs: list) -> dict[str, str]:
     return mention_map
 
 
+async def _build_reply_map(msgs: list, channel, bot_user_id: int) -> tuple[dict[int, dict], list]:
+    """Build reply context for user messages that reference another message.
+
+    Returns:
+        reply_map: dict[message_id -> {author_name, content}]
+        extra_msgs: Discord messages fetched outside the history window
+                    (needed so their mention tokens can be added to mention_map)
+    """
+    local_map = {msg.id: msg for msg in msgs}
+    reply_map: dict[int, dict] = {}
+    extra_msgs: list = []
+
+    for msg in msgs:
+        if msg.author.id == bot_user_id:
+            continue
+        if not (msg.reference and msg.reference.message_id):
+            continue
+        ref_id = msg.reference.message_id
+        ref_msg = local_map.get(ref_id)
+        if ref_msg is None:
+            try:
+                ref_msg = await channel.fetch_message(ref_id)
+                extra_msgs.append(ref_msg)
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                continue
+        if ref_msg and ref_msg.content:
+            reply_map[msg.id] = {
+                "author_name": ref_msg.author.display_name,
+                "content": ref_msg.content,
+            }
+
+    if reply_map:
+        print(
+            f"↩️  [fetch_and_process_history] Resolved {len(reply_map)} reply reference(s) in history"
+            + (f" ({len(extra_msgs)} fetched outside window)" if extra_msgs else "")
+        )
+    return reply_map, extra_msgs
+
+
 def _replace_table_placeholders(content: str, table_map: dict) -> str:
     """Replace table image placeholders with actual table markdown."""
     placeholder_pattern = r"> `\[dango_replaced_table_(\d+)_(\d+)_as_image\]`"
@@ -259,10 +299,12 @@ def _process_messages(
     image_map: dict,
     deep_map: dict | None = None,
     mention_map: dict | None = None,
+    reply_map: dict | None = None,
 ) -> tuple[list[Message], set[str]]:
     """Normalize Discord messages and convert to Agno Message list."""
     deep_map = deep_map or {}
     mention_map = mention_map or {}
+    reply_map = reply_map or {}
     raw_messages = []
     unique_users: set[str] = set()
 
@@ -289,10 +331,20 @@ def _process_messages(
         else:
             author_name = msg.author.display_name
             unique_users.add(author_name)
+            content = resolve_mentions(msg.content.strip(), mention_map)
+            if msg.id in reply_map:
+                ref_info = reply_map[msg.id]
+                ref_content = resolve_mentions(ref_info["content"], mention_map)
+                content = format_reply_context(
+                    current_author=author_name,
+                    ref_author=ref_info["author_name"],
+                    ref_content=ref_content,
+                    current_content=content,
+                )
             raw_messages.append(
                 {
                     "role": "user",
-                    "content": resolve_mentions(msg.content.strip(), mention_map),
+                    "content": content,
                     "author_id": msg.author.id,
                     "author_name": author_name,
                     "images": image_map.get(msg.id, []),
