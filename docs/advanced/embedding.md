@@ -101,6 +101,42 @@ The agent can **read**, **list**, and **search** files inside `WORKSPACE_ROOT`. 
 
 ---
 
+## Complete `.env` reference
+
+Copy this into your `.env` and uncomment what you need. `uv run` does **not** load `.env` automatically — your `main.py` must call `load_dotenv()` before any dango import (see [Loading the Cogs](#loading-the-cogs)).
+
+```env
+# ── Discord ────────────────────────────────────────────────────────────────────
+DISCORD_TOKEN=your_discord_bot_token_here
+
+# ── LLM — required ─────────────────────────────────────────────────────────────
+FAST_MODEL=google:gemini-2.0-flash
+FAST_API_KEY=your_api_key_here
+
+# ── LLM — deep model (optional) ────────────────────────────────────────────────
+# Enables the /deep slash command and smart routing.
+# DEEP_MODEL=google:gemini-2.5-pro
+# DEEP_API_KEY=your_deep_api_key_here      # falls back to FAST_API_KEY if unset
+# AUTO_ROUTE=on                            # auto-route complex questions to deep model
+# FALLBACK_ON_ERROR=on                     # fall back to deep model on fast model errors
+
+# ── Features ───────────────────────────────────────────────────────────────────
+# ENABLE_DUCKDUCKGO=on                     # web search (no API key needed)
+# ENABLE_WEBSITE_TOOLS=on                  # read URLs that appear in messages
+# ENABLE_WORKSPACE=on                      # read files from a local directory
+# WORKSPACE_ROOT=workspace                 # directory to expose (default: ./workspace)
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
+# WORKSPACE_SYS_PROMPT_PATH=config/workspace_sys_prompt.txt   # auto-generated; usually not set
+
+# ── Behaviour (optional) ───────────────────────────────────────────────────────
+# CONTEXT_TOKEN_BUDGET=8000                # max tokens of history fed to the agent (0 = no limit)
+# ENABLE_CONTEXTUAL_SYSTEM_PROMPT=off      # inject server/channel context into system prompt (default: on)
+```
+
+---
+
 ## Installation
 
 ```bash
