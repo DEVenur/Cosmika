@@ -103,37 +103,43 @@ The agent can **read**, **list**, and **search** files inside `WORKSPACE_ROOT`. 
 
 ## Complete `.env` reference
 
-Copy this into your `.env` and uncomment what you need. `uv run` does **not** load `.env` automatically — your `main.py` must call `load_dotenv()` before any dango import (see [Loading the Cogs](#loading-the-cogs)).
+The dango repo ships a fully-commented [`.env.example`](https://github.com/zhiro-labs/dango/blob/main/.env.example) that covers every supported variable — model providers, Gemini-specific knobs (thinking budget, search grounding, per-model context limits), custom API tools, and more. Use it as the authoritative reference.
+
+For embedding, start from that file and fill in at minimum:
 
 ```env
-# ── Discord ────────────────────────────────────────────────────────────────────
-DISCORD_TOKEN=your_discord_bot_token_here
-
 # ── LLM — required ─────────────────────────────────────────────────────────────
-FAST_MODEL=google:gemini-2.0-flash
-FAST_API_KEY=your_api_key_here
+# Format: provider:model_id
+# e.g. google:gemini-2.0-flash | openai:gpt-4o | anthropic:claude-sonnet-4-20250514
+FAST_MODEL=
+FAST_API_KEY=
 
-# ── LLM — deep model (optional) ────────────────────────────────────────────────
-# Enables the /deep slash command and smart routing.
-# DEEP_MODEL=google:gemini-2.5-pro
-# DEEP_API_KEY=your_deep_api_key_here      # falls back to FAST_API_KEY if unset
-# AUTO_ROUTE=on                            # auto-route complex questions to deep model
-# FALLBACK_ON_ERROR=on                     # fall back to deep model on fast model errors
+# ── Deep model (optional) ──────────────────────────────────────────────────────
+# Enables /deep and smart routing. Leave blank to disable.
+DEEP_MODEL=
+DEEP_API_KEY=                  # falls back to FAST_API_KEY if blank
+AUTO_ROUTE=off
+FALLBACK_ON_ERROR=off
 
 # ── Features ───────────────────────────────────────────────────────────────────
-# ENABLE_DUCKDUCKGO=on                     # web search (no API key needed)
-# ENABLE_WEBSITE_TOOLS=on                  # read URLs that appear in messages
-# ENABLE_WORKSPACE=on                      # read files from a local directory
-# WORKSPACE_ROOT=workspace                 # directory to expose (default: ./workspace)
+ENABLE_DUCKDUCKGO=off
+ENABLE_WEBSITE_TOOLS=off
+ENABLE_WORKSPACE=off
+WORKSPACE_ROOT=workspace
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
-# WORKSPACE_SYS_PROMPT_PATH=config/workspace_sys_prompt.txt   # auto-generated; usually not set
 
-# ── Behaviour (optional) ───────────────────────────────────────────────────────
-# CONTEXT_TOKEN_BUDGET=8000                # max tokens of history fed to the agent (0 = no limit)
-# ENABLE_CONTEXTUAL_SYSTEM_PROMPT=off      # inject server/channel context into system prompt (default: on)
+# ── Behaviour ──────────────────────────────────────────────────────────────────
+ENABLE_CONTEXTUAL_SYSTEM_PROMPT=on
+CONTEXT_TOKEN_BUDGET=          # max input tokens per request; blank = no limit
 ```
+
+!!! note "Discord token"
+    The Discord bot token (`DISCORD_BOT_TOKEN`) is **not** a dango variable — it belongs to the host bot's own env config. Only the variables above are read by dango.
+
+!!! note "uv and `.env`"
+    `uv run` does **not** load `.env` automatically. Your `main.py` must call `load_dotenv()` before any dango import (see [Loading the Cogs](#loading-the-cogs)).
 
 ---
 
