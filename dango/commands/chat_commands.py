@@ -128,6 +128,7 @@ class ChatCog(commands.Cog):
                 message_data["_bot"] = self.bot
                 message_data["_chat_sys_prompt"] = self.chat_system_prompt
                 message_data["_history_limit"] = self.runtime_config.history_limit
+                message_data["_timezone"] = self.runtime_config.timezone
 
                 await self.discord_workflow.arun(input=message_data)
                 print("✅ [on_message] Workflow completed successfully")
@@ -253,6 +254,7 @@ class ChatCog(commands.Cog):
                 "_bot": self.bot,
                 "_chat_sys_prompt": self.chat_system_prompt,
                 "_history_limit": self.runtime_config.history_limit,
+                "_timezone": self.runtime_config.timezone,
                 "_force_deep": True,
             }
 

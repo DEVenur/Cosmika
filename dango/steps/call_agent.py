@@ -162,6 +162,7 @@ def _dynamic_instructions(session_state: dict) -> str:
         unique_users=set(session_state.get("unique_users", [])),
         enable_contextual=ENABLE_CONTEXTUAL_SYSTEM_PROMPT,
         history_limit=session_state.get("history_limit"),
+        timezone=session_state.get("timezone"),
     )
 
 
@@ -583,14 +584,15 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
     print(f"🤖 [call_discord_agent] Sending {len(messages_to_send)} messages to {model_name}")
 
     session_state = {
-        "author_name": message_data["author_name"],
+        "author_name":  message_data["author_name"],
         "unique_users": list(unique_users),
         "chat_sys_prompt": message_data["_chat_sys_prompt"],
         "history_limit": message_data.get("_history_limit"),
-        "channel_id": message_data.get("channel_id"),
+        "timezone":     message_data.get("_timezone"),
+        "channel_id":   message_data.get("channel_id"),
         "channel_name": message_data.get("channel_name", ""),
-        "guild_id": message_data.get("guild_id"),
-        "guild_name": message_data.get("guild_name", ""),
+        "guild_id":     message_data.get("guild_id"),
+        "guild_name":   message_data.get("guild_name", ""),
     }
 
     fallback_name: str | None = None
