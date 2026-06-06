@@ -1,33 +1,28 @@
 """
-Runtime configuration management.
+Runtime configuration management with YAML persistence.
 
-Bootstrap priority (on startup):
-  1. config/runtime.yml exists → load from YAML  (Docker GUI or after first Discord command)
-  2. file absent               → load from .env   (first run, uv / package deployment)
+config/runtime.yml is always created on first run with sane defaults.
+It is the single source of truth for runtime state across all deployment
+modes (Docker + GUI, uv, embedded package).
 
-On any mutation (add_channel, set_timezone, …) the YAML is always written,
-creating the file if needed. This means env vars serve as one-time bootstrap
-defaults; all subsequent runtime state is persisted in the YAML.
+  Docker + GUI  — GUI writes the file; bot reads and updates it.
+  uv / package  — file is auto-created at startup; Discord commands update it.
+
+.env (or environment variables) is NOT used for runtime settings.
+It is reserved for credentials, model names, and feature flags.
 """
 
-import os
 from pathlib import Path
 from threading import Lock
 
 import yaml
 
 
-def _parse_ids(val: str) -> list[int]:
-    """Parse a comma-separated string of IDs into a list of ints."""
-    return [int(x.strip()) for x in val.split(",") if x.strip().isdigit()]
-
-
 class RuntimeConfig:
-    """Thread-safe runtime configuration.
+    """Thread-safe runtime configuration with YAML persistence.
 
-    Reads YAML when available, falls back to env vars on first run.
-    Always persists mutations to YAML so Discord commands survive restarts
-    regardless of deployment mode (Docker, uv, or embedded package).
+    Loads config/runtime.yml on startup, creating it with sane defaults if
+    absent. All mutations persist to YAML so Discord commands survive restarts.
     """
 
     def __init__(self, config_path: str = "config/runtime.yml"):
@@ -45,16 +40,17 @@ class RuntimeConfig:
             self._cache.setdefault("channel_metadata", {})
             self._cache.setdefault("user_metadata", {})
         else:
-            # First run — bootstrap from env vars; YAML created on first mutation
+            # First run — create file with sane defaults
             self._cache = {
-                "allowed_channels": _parse_ids(os.getenv("ALLOWED_CHANNELS", "")),
-                "allowed_users":    _parse_ids(os.getenv("ALLOWED_USERS", "")),
+                "allowed_channels": [],
+                "allowed_users":    [],
                 "channel_metadata": {},
                 "user_metadata":    {},
-                "timezone":         os.getenv("TIMEZONE", "UTC"),
-                "discord_activity": os.getenv("DISCORD_ACTIVITY", "Surfing"),
-                "history_limit":    int(os.getenv("HISTORY_LIMIT", "12")),
+                "timezone":         "UTC",
+                "discord_activity": "Surfing",
+                "history_limit":    12,
             }
+            self._save()
 
     def _save(self) -> None:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
