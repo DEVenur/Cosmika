@@ -323,7 +323,7 @@ def _make_db_provider(name: str, db_url: str, description: str = "") -> list:
     return provider.get_tools()
 
 
-def _make_agent(model: _DangoGemini | object | str, extra_tools: list | None = None) -> Agent:
+def _make_agent(model: _DangoGemini | object | str) -> Agent:
     tools = []
     if ENABLE_WORKSPACE:
         from agno.tools.workspace import Workspace
@@ -349,8 +349,6 @@ def _make_agent(model: _DangoGemini | object | str, extra_tools: list | None = N
                 db_cfg.get("db_url", ""),
                 db_cfg.get("description", ""),
             ))
-    if extra_tools:
-        tools.extend(extra_tools)
 
     return Agent(
         model=model,
@@ -361,18 +359,6 @@ def _make_agent(model: _DangoGemini | object | str, extra_tools: list | None = N
         add_history_to_context=False,
         markdown=False,
     )
-
-
-def make_extra_agents(extra_tools: list) -> tuple["Agent", "Agent | None"]:
-    """Create a (fast_agent, deep_agent) pair that includes additional tools.
-
-    Call this once during bot setup (e.g. inside a Cog's __init__) and pass the
-    returned tuple via message_data["_agents"] so call_discord_agent picks them up.
-    """
-    _initialize_agents()
-    fast = _make_agent(_fast_model, extra_tools)
-    deep = _make_agent(_deep_model, extra_tools) if _deep_model else None
-    return fast, deep
 
 
 def _context_budget(prefix: str) -> int:
@@ -548,10 +534,8 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
     unique_users = set(data.get("unique_users", []))
     mention_map: dict[str, str] = data.get("mention_map") or {}
 
-    # Use injected agents (from ChatCog.extra_tools) when present, else module singletons.
-    _injected: tuple | None = message_data.get("_agents")
-    _fast: Agent = _injected[0] if _injected else fast_agent
-    _deep: Agent | None = _injected[1] if _injected else deep_agent
+    _fast: Agent = fast_agent
+    _deep: Agent | None = deep_agent
 
     current_content = resolve_mentions(message_data["content"], mention_map)
     user_content = f"{message_data['author_name']}: {current_content}"
@@ -603,17 +587,10 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
         "unique_users": list(unique_users),
         "chat_sys_prompt": message_data["_chat_sys_prompt"],
         "history_limit": message_data.get("_history_limit"),
-        # Discord context — accessible inside tools via run_context.session_state
-        "author_id": message_data.get("author_id"),
-        "author_roles": message_data.get("author_roles", []),
-        "_author_permissions": message_data.get("author_permissions", set()),
         "channel_id": message_data.get("channel_id"),
         "channel_name": message_data.get("channel_name", ""),
         "guild_id": message_data.get("guild_id"),
         "guild_name": message_data.get("guild_name", ""),
-        # Discord objects — use get_discord_bot() / get_discord_interaction() helpers
-        "_bot": message_data.get("_bot"),
-        "_interaction": message_data.get("_interaction"),
     }
 
     fallback_name: str | None = None
@@ -643,7 +620,6 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
                 "error": True,
                 "error_message": format_sysinfo(body),
                 "message_data": message_data,
-                "ephemeral": session_state.get("_ephemeral", False),
             }
         )
 
@@ -654,7 +630,6 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
         content={
             "llm_response": llm_response,
             "message_data": message_data,
-            "ephemeral": session_state.get("_ephemeral", False),
             "fallback_sysinfo": (
                 format_sysinfo(f"⚡ {model_name} failed — response served by {fallback_name}.")
                 if fallback_name else None
