@@ -38,7 +38,6 @@ async def extract_and_render_tables(step_input: StepInput) -> StepOutput:
                 "message_data": message_data,
                 "fallback_sysinfo": data.get("fallback_sysinfo"),
                 "ephemeral": data.get("ephemeral", False),
-                "discord_response": data.get("discord_response"),
             }
         )
 
