@@ -4,6 +4,8 @@
 
 Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型只要改一行設定，重啟 Bot 就生效。不需要動程式碼——頻道、用戶白名單、Bot 行為都可以透過 Discord 指令即時調整。
 
+不需要建立資料庫——掛載一個文件資料夾，Bot 就能直接根據你的文件回答問題。
+
 **[📖 完整文件](https://zhiro-labs.github.io/dango)** · [English README](README.md)
 
 ---

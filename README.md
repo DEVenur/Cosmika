@@ -4,6 +4,8 @@ An **open-source Discord AI bot** and agent — connect any AI model to your Dis
 
 Gemini, GPT-4o, Claude, Llama, local Ollama — they all work. Switch providers by changing one line and restarting. No code changes — channels, users, and bot behaviour are all configurable live from Discord slash commands.
 
+No database setup required — mount a folder of docs and the bot answers from them directly.
+
 **[📖 Full Documentation](https://zhiro-labs.github.io/dango)** · [中文版 README](README.zh-TW.md)
 
 ---
