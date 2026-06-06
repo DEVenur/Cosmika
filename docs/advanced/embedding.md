@@ -54,6 +54,25 @@ WORKSPACE_ROOT=workspace   # optional — defaults to ./workspace relative to th
 
 The agent can **read**, **list**, and **search** files inside `WORKSPACE_ROOT`. Write access is intentionally disabled.
 
+!!! warning "Workspace init is not automatic when embedding"
+    When running Dango as a standalone bot (`main.py`), workspace context is initialised automatically. When embedding Dango as a package, you must call `workspace_context.init()` yourself in `setup_hook` — otherwise the workspace system prompt is never generated and the agent has no knowledge of the workspace files.
+
+    ```python
+    import os
+    from dango.utils import workspace_context
+
+    @bot.event
+    async def setup_hook():
+        if os.getenv("ENABLE_WORKSPACE") == "on":
+            await workspace_context.init(
+                os.getenv("WORKSPACE_ROOT", "workspace"),
+                os.getenv("WORKSPACE_SYS_PROMPT_PATH", "config/workspace_sys_prompt.txt"),
+            )
+        # ... add_cog calls below
+    ```
+
+    `workspace_context.init()` reads the workspace files, generates a topic-index system prompt block, and caches it. The cache is invalidated automatically whenever workspace files change.
+
 ### Full `.env` example
 
 ```env
