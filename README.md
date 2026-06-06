@@ -26,8 +26,8 @@ And that's not all — you can also give it tools:
 
 Already have a Discord bot?
 
-- **Embeddable** — the whole thing is a standard discord.py Cog; drop Dango's agent and slash commands into any existing bot in a few lines.
-- **Commands as tools** — wrap your bot's existing commands with `@discord_tool` and the agent can call them on behalf of users. Your original commands keep working unchanged — for example, `!play` / `/play` still work as before, but users can now also just ask "play some lofi" and the agent handles it.
+- **Embeddable** (Beta) — the whole thing is a standard discord.py Cog; drop Dango's agent and slash commands into any existing bot in a few lines.
+- **Commands as tools**（開發中） — wrap your bot's existing commands with `@discord_tool` and the agent can call them on behalf of users. Your original commands keep working unchanged — for example, `!play` / `/play` still work as before, but users can now also just ask "play some lofi" and the agent handles it.
 
 ## Before you start
 
