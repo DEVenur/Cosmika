@@ -112,7 +112,7 @@ AUTO_ROUTE = env_onoff_to_bool(os.getenv("AUTO_ROUTE"))
 FALLBACK_ON_ERROR = env_onoff_to_bool(os.getenv("FALLBACK_ON_ERROR"))
 
 ENABLE_CONTEXTUAL_SYSTEM_PROMPT = env_onoff_to_bool(
-    os.getenv("ENABLE_CONTEXTUAL_SYSTEM_PROMPT")
+    os.getenv("ENABLE_CONTEXTUAL_SYSTEM_PROMPT"), default=True
 )
 
 # ── Workspace ─────────────────────────────────────────────────────────────────

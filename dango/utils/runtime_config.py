@@ -23,12 +23,24 @@ class RuntimeConfig:
 
     Loads config/runtime.yml on startup, creating it with sane defaults if
     absent. All mutations persist to YAML so Discord commands survive restarts.
+
+    Args:
+        config_path: Path to the YAML file (created automatically on first run).
+        default_channels: Channel IDs to add when no YAML exists yet (first run
+            only). Ignored on subsequent starts so admin /removechannel changes
+            are preserved. Intended for embedded deployments where the developer
+            knows the target channels upfront.
     """
 
-    def __init__(self, config_path: str = "config/runtime.yml"):
+    def __init__(
+        self,
+        config_path: str = "config/runtime.yml",
+        default_channels: list[int] | None = None,
+    ):
         self.config_path = Path(config_path)
         self._lock = Lock()
         self._cache: dict = {}
+        self._default_channels: list[int] = default_channels or []
         self._load()
 
     # ── Internal ─────────────────────────────────────────────────────────────
@@ -42,7 +54,7 @@ class RuntimeConfig:
         else:
             # First run — create file with sane defaults
             self._cache = {
-                "allowed_channels": [],
+                "allowed_channels": list(self._default_channels),
                 "allowed_users":    [],
                 "channel_metadata": {},
                 "user_metadata":    {},

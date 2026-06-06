@@ -63,7 +63,7 @@ DISCORD_BOT_ACTIVITY = runtime_config.discord_activity
 
 FAST_MODEL = os.getenv("FAST_MODEL")
 ENABLE_CONTEXTUAL_SYSTEM_PROMPT = env_onoff_to_bool(
-    os.getenv("ENABLE_CONTEXTUAL_SYSTEM_PROMPT")
+    os.getenv("ENABLE_CONTEXTUAL_SYSTEM_PROMPT"), default=True
 )
 ENABLE_WORKSPACE = env_onoff_to_bool(os.getenv("ENABLE_WORKSPACE"))
 WORKSPACE_ROOT = os.getenv("WORKSPACE_ROOT", "workspace")

@@ -17,7 +17,7 @@ Dango ships with several AI capabilities that are available to any bot that impo
 
 ### Chat
 
-The agent always responds to messages in allowed channels or DMs. It reads the conversation history automatically and replies in context.
+The agent reads the conversation history automatically and replies in context.
 
 ```env
 # Required — pick a model from any supported provider
@@ -26,6 +26,20 @@ FAST_API_KEY=your_api_key_here
 ```
 
 That's the minimum. Everything below is opt-in.
+
+**Channel mode vs mention mode**
+
+By default the bot only responds when directly @mentioned. To make it respond to every message in specific channels (the typical experience), configure allowed channels one of two ways:
+
+- **Programmatic** — pass `default_channels` to `RuntimeConfig` if you know the channel IDs upfront. These are seeded into `config/runtime.yml` on the very first run; subsequent starts use whatever is in the YAML, so admin `/removechannel` changes are preserved:
+
+  ```python
+  runtime_config = RuntimeConfig("config/runtime.yml", default_channels=[YOUR_CHANNEL_ID])
+  ```
+
+- **Runtime** — let a Discord admin run `/addchannel` in each target channel after the bot is running.
+
+Channel configuration is stored in `config/runtime.yml` (auto-created on first run). Without any allowed channels the bot still works, but users must @mention it every time.
 
 ### Web search
 
@@ -125,7 +139,7 @@ await bot.add_cog(AdminCog(bot, runtime_config))
 
 **`create_discord_workflow()`** returns the Agno `Workflow` that wires together the four pipeline steps (fetch history → call agent → render tables → send response). Call it once at startup and pass the result to `ChatCog`.
 
-**`RuntimeConfig(config_path)`** loads `config/runtime.yml` (created automatically on first write). It stores the allowed channel and user lists, timezone, history limit, and activity string. Pass the same instance to both `ChatCog` and `AdminCog` so admin commands take effect immediately.
+**`RuntimeConfig(config_path, default_channels=None)`** loads `config/runtime.yml` (created automatically on first run). It stores the allowed channel and user lists, timezone, history limit, and activity string. Pass the same instance to both `ChatCog` and `AdminCog` so admin commands take effect immediately. `default_channels` pre-seeds the channel list when no YAML exists yet — ignored on subsequent starts so `/removechannel` changes are preserved.
 
 **`AdminCog`** adds the following slash commands (all require the **Administrator** server permission, all responses are ephemeral):
 
@@ -682,7 +696,7 @@ with open(os.getenv("CHAT_SYS_PROMPT_PATH", "config/chat_sys_prompt.txt"), encod
     chat_system_prompt = f.read()
 
 workflow = create_discord_workflow()
-runtime_config = RuntimeConfig("config/runtime.yml")
+runtime_config = RuntimeConfig("config/runtime.yml", default_channels=[YOUR_CHANNEL_ID])
 await bot.add_cog(ChatCog(
     bot,
     workflow,
@@ -700,13 +714,7 @@ await bot.add_cog(ChatCog(
 
 ### Step 6 — Allow channels
 
-Start the bot, then in each channel where you want natural-language responses, run:
-
-```
-/addchannel
-```
-
-This is `AdminCog`'s built-in command. It adds the current channel to the allowed list stored in `config/runtime.yml`. The bot will now respond to all messages in that channel, not just @mentions.
+`default_channels=[YOUR_CHANNEL_ID]` in step 5 handles this automatically on first run. To add more channels later, a Discord admin can run `/addchannel` in any target channel.
 
 ### Result
 
