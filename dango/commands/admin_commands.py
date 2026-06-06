@@ -19,7 +19,7 @@ class AdminCog(commands.Cog):
     @app_commands.command(
         name="addchannel", description="Add current channel to bot's allowed list"
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def addchannel(self, interaction: discord.Interaction):
         try:
             if not interaction.guild:
@@ -62,7 +62,7 @@ class AdminCog(commands.Cog):
         name="removechannel",
         description="Remove current channel from bot's allowed list",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def removechannel(self, interaction: discord.Interaction):
         try:
             if not interaction.guild:
@@ -101,7 +101,7 @@ class AdminCog(commands.Cog):
         name="listchannels",
         description="List all channels where bot is allowed in this server",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def listchannels(self, interaction: discord.Interaction):
         try:
             if not interaction.guild:
@@ -151,7 +151,7 @@ class AdminCog(commands.Cog):
             )
 
     @app_commands.command(name="adduser", description="Add a user to bot's allowed DM list")
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def adduser(self, interaction: discord.Interaction, user: discord.User):
         try:
             if not interaction.guild:
@@ -194,7 +194,7 @@ class AdminCog(commands.Cog):
     @app_commands.command(
         name="removeuser", description="Remove a user from bot's allowed DM list"
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def removeuser(self, interaction: discord.Interaction, user: discord.User):
         try:
             if not interaction.guild:
@@ -232,7 +232,7 @@ class AdminCog(commands.Cog):
     @app_commands.command(
         name="listusers", description="List all users allowed to DM the bot"
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def listusers(self, interaction: discord.Interaction):
         try:
             if not interaction.guild:
@@ -270,7 +270,7 @@ class AdminCog(commands.Cog):
         name="refreshmetadata",
         description="Refresh all channel and user names in config comments",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def refreshmetadata(self, interaction: discord.Interaction):
         try:
             if not interaction.guild:
@@ -333,7 +333,7 @@ class AdminCog(commands.Cog):
         name="sethistorylimit",
         description="Set the number of messages to include in conversation history",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def sethistorylimit(self, interaction: discord.Interaction, limit: int):
         try:
             if not interaction.guild:
@@ -359,7 +359,7 @@ class AdminCog(commands.Cog):
         name="setactivity",
         description="Set the bot's Discord activity status message",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def setactivity(self, interaction: discord.Interaction, activity: str):
         try:
             if not interaction.guild:
@@ -399,7 +399,7 @@ class AdminCog(commands.Cog):
         description="Set the bot's timezone for timestamps",
     )
     @app_commands.describe(timezone="The timezone to set (e.g., Asia/Tokyo)")
-    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def settimezone(self, interaction: discord.Interaction, timezone: str):
         try:
             if not interaction.guild:
