@@ -9,27 +9,31 @@ tags:
 
 # Embedding into Another Bot
 
-Dango's agent lives in a standard discord.py Cog, so you can drop it into any existing bot. The bot keeps all its slash commands and prefix commands; Dango adds a natural-language layer on top.
+Dango's agent lives in a standard discord.py Cog, so you can drop it into any existing bot. The bot keeps all its slash commands and prefix commands; Dango adds these capabilities on top:
 
-## Built-in features
+| Feature | Env var | What it does |
+|---|---|---|
+| **Chat** | (always on) | Natural-language conversation with automatic history context |
+| **Web search** | `ENABLE_DUCKDUCKGO=on` | Agent searches the web when it needs up-to-date information |
+| **Read URL** | `ENABLE_WEBSITE_TOOLS=on` | Agent reads linked pages that appear in messages |
+| **Workspace** | `ENABLE_WORKSPACE=on` | Agent reads files from a local directory (read-only) |
 
-Dango ships with several AI capabilities that are available to any bot that imports it. All features are controlled by environment variables — no code changes required.
+All features are opt-in via environment variables — no code changes required beyond loading the Cogs once.
 
-### Chat
+---
 
-The agent reads the conversation history automatically and replies in context.
+## Chat
+
+The agent reads conversation history automatically and replies in context. The only required configuration is an LLM provider:
 
 ```env
-# Required — pick a model from any supported provider
 FAST_MODEL=google:gemini-2.0-flash
 FAST_API_KEY=your_api_key_here
 ```
 
-That's the minimum. Everything below is opt-in.
-
 **Channel mode vs mention mode**
 
-By default the bot only responds when directly @mentioned. To make it respond to every message in specific channels (the typical experience), configure allowed channels one of two ways:
+By default the bot only responds when directly @mentioned. To make it respond to every message in specific channels, configure allowed channels one of two ways:
 
 - **Programmatic** — pass `default_channels` to `RuntimeConfig` if you know the channel IDs upfront. These are seeded into `config/runtime.yml` on the very first run; subsequent starts use whatever is in the YAML, so admin `/removechannel` changes are preserved:
 
@@ -41,7 +45,9 @@ By default the bot only responds when directly @mentioned. To make it respond to
 
 Channel configuration is stored in `config/runtime.yml` (auto-created on first run). Without any allowed channels the bot still works, but users must @mention it every time.
 
-### Web search
+---
+
+## Web search
 
 Set `ENABLE_DUCKDUCKGO=on` to let the agent search the web when it needs up-to-date information:
 
@@ -51,13 +57,19 @@ ENABLE_DUCKDUCKGO=on
 
 No API key needed. The agent decides on its own when to search — users don't have to ask explicitly.
 
-You can also enable `ENABLE_WEBSITE_TOOLS=on` to let the agent fetch and read the content of URLs that appear in messages:
+---
+
+## Read URL
+
+Set `ENABLE_WEBSITE_TOOLS=on` to let the agent fetch and read the content of URLs that appear in messages:
 
 ```env
 ENABLE_WEBSITE_TOOLS=on
 ```
 
-### Workspace (file read access)
+---
+
+## Workspace
 
 The Workspace tool gives the agent read-only access to a local directory. Useful for bots that want the agent to answer questions about documentation, logs, or any files on the host machine.
 
@@ -86,27 +98,6 @@ The agent can **read**, **list**, and **search** files inside `WORKSPACE_ROOT`. 
     ```
 
     `workspace_context.init()` reads the workspace files, generates a topic-index system prompt block, and caches it. The cache is invalidated automatically whenever workspace files change.
-
-### Full `.env` example
-
-```env
-# Model
-FAST_MODEL=google:gemini-2.0-flash
-FAST_API_KEY=your_api_key_here
-
-# Optional: deeper model for complex questions (falls back to FAST_MODEL if not set)
-DEEP_MODEL=google:gemini-2.5-pro
-DEEP_API_KEY=your_api_key_here
-
-# Built-in tools
-ENABLE_DUCKDUCKGO=on
-ENABLE_WEBSITE_TOOLS=on
-ENABLE_WORKSPACE=on
-WORKSPACE_ROOT=workspace
-
-# Bot behaviour
-CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
-```
 
 ---
 
@@ -141,8 +132,9 @@ Then load the Cogs in `setup_hook`:
 ```python
 @bot.event
 async def setup_hook():
-    # Workspace init (only if ENABLE_WORKSPACE=on)
     import os
+
+    # Workspace init (only if ENABLE_WORKSPACE=on)
     if os.getenv("ENABLE_WORKSPACE") == "on":
         await workspace_context.init(
             os.getenv("WORKSPACE_ROOT", "workspace"),
