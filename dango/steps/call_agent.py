@@ -96,22 +96,12 @@ def _inject_provider_key(model_str: str, api_key: str | None) -> None:
 
 # ── Model identity ─────────────────────────────────────────────────────────────
 FAST_MODEL = os.getenv("FAST_MODEL") or ""
-if not FAST_MODEL:
-    raise RuntimeError(
-        "FAST_MODEL is not set. Configure it in the Web GUI (Models tab) or set the "
-        "FAST_MODEL environment variable (e.g. 'google:gemini-2.0-flash')."
-    )
 FAST_API_KEY = os.getenv("FAST_API_KEY")
 FAST_BASE_URL = os.getenv("FAST_BASE_URL")  # optional custom endpoint for local/proxied models
 
 DEEP_MODEL = os.getenv("DEEP_MODEL")  # optional; routing is disabled when unset
 DEEP_API_KEY = os.getenv("DEEP_API_KEY") or FAST_API_KEY
 DEEP_BASE_URL = os.getenv("DEEP_BASE_URL")
-
-# Inject provider keys before any model class is instantiated.
-_inject_provider_key(FAST_MODEL, FAST_API_KEY)
-if DEEP_MODEL:
-    _inject_provider_key(DEEP_MODEL, DEEP_API_KEY)
 
 # on/off — auto-route between fast and deep model based on message complexity.
 # Has no effect when DEEP_MODEL is not set.
@@ -120,12 +110,6 @@ AUTO_ROUTE = env_onoff_to_bool(os.getenv("AUTO_ROUTE"))
 # on/off — fall back to DEEP_MODEL when FAST_MODEL returns an error (e.g. 503).
 # Has no effect when DEEP_MODEL is not set.
 FALLBACK_ON_ERROR = env_onoff_to_bool(os.getenv("FALLBACK_ON_ERROR"))
-
-if FALLBACK_ON_ERROR and DEEP_MODEL and _parse_provider(FAST_MODEL) == _parse_provider(DEEP_MODEL):
-    print(
-        f"⚠️  [config] FAST_MODEL and DEEP_MODEL share provider "
-        f"'{_parse_provider(FAST_MODEL)}' — FALLBACK_ON_ERROR won't protect against provider-wide outages."
-    )
 
 ENABLE_CONTEXTUAL_SYSTEM_PROMPT = env_onoff_to_bool(
     os.getenv("ENABLE_CONTEXTUAL_SYSTEM_PROMPT")
@@ -385,6 +369,7 @@ def make_extra_agents(extra_tools: list) -> tuple["Agent", "Agent | None"]:
     Call this once during bot setup (e.g. inside a Cog's __init__) and pass the
     returned tuple via message_data["_agents"] so call_discord_agent picks them up.
     """
+    _initialize_agents()
     fast = _make_agent(_fast_model, extra_tools)
     deep = _make_agent(_deep_model, extra_tools) if _deep_model else None
     return fast, deep
@@ -395,14 +380,47 @@ def _context_budget(prefix: str) -> int:
     return int(v) if v else 0
 
 
-# ── Module-level singletons ───────────────────────────────────────────────────
-_fast_model = _make_model(FAST_MODEL, FAST_API_KEY, "FAST", FAST_BASE_URL)
-_fast_gemini: _DangoGemini | None = _fast_model if isinstance(_fast_model, _DangoGemini) else None
-fast_agent = _make_agent(_fast_model)
+# ── Module-level singletons (lazy — created on first call to avoid import-time env checks) ─
+_fast_model: _DangoGemini | str | None = None
+_fast_gemini: _DangoGemini | None = None
+fast_agent: Agent | None = None
 
-_deep_model = _make_model(DEEP_MODEL, DEEP_API_KEY, "DEEP", DEEP_BASE_URL) if DEEP_MODEL else None
-_deep_gemini: _DangoGemini | None = _deep_model if isinstance(_deep_model, _DangoGemini) else None
-deep_agent: Agent | None = _make_agent(_deep_model) if _deep_model else None
+_deep_model: _DangoGemini | str | None = None
+_deep_gemini: _DangoGemini | None = None
+deep_agent: Agent | None = None
+
+_agents_initialized = False
+
+
+def _initialize_agents() -> None:
+    """Validate config and create agent singletons on first call.
+
+    Deferred from module level so that importing dango does not require env vars to be set.
+    """
+    global _fast_model, _fast_gemini, fast_agent, _deep_model, _deep_gemini, deep_agent, _agents_initialized
+    if _agents_initialized:
+        return
+    if not FAST_MODEL:
+        raise RuntimeError(
+            "FAST_MODEL is not set. Configure it in the Web GUI (Models tab) or set the "
+            "FAST_MODEL environment variable (e.g. 'google:gemini-2.0-flash')."
+        )
+    _inject_provider_key(FAST_MODEL, FAST_API_KEY)
+    if DEEP_MODEL:
+        _inject_provider_key(DEEP_MODEL, DEEP_API_KEY)
+    if FALLBACK_ON_ERROR and DEEP_MODEL and _parse_provider(FAST_MODEL) == _parse_provider(DEEP_MODEL):
+        print(
+            f"⚠️  [config] FAST_MODEL and DEEP_MODEL share provider "
+            f"'{_parse_provider(FAST_MODEL)}' — FALLBACK_ON_ERROR won't protect against provider-wide outages."
+        )
+    _fast_model = _make_model(FAST_MODEL, FAST_API_KEY, "FAST", FAST_BASE_URL)
+    _fast_gemini = _fast_model if isinstance(_fast_model, _DangoGemini) else None
+    fast_agent = _make_agent(_fast_model)
+    _deep_model = _make_model(DEEP_MODEL, DEEP_API_KEY, "DEEP", DEEP_BASE_URL) if DEEP_MODEL else None
+    _deep_gemini = _deep_model if isinstance(_deep_model, _DangoGemini) else None
+    deep_agent = _make_agent(_deep_model) if _deep_model else None
+    _agents_initialized = True
+
 
 FAST_CONTEXT_TOKEN_BUDGET = _context_budget("FAST")
 DEEP_CONTEXT_TOKEN_BUDGET = _context_budget("DEEP")
@@ -520,6 +538,7 @@ async def _download_current_images(attachments: list) -> list[Image]:
 
 async def call_discord_agent(step_input: StepInput) -> StepOutput:
     """Run the Discord agent with per-request context injected via session_state."""
+    _initialize_agents()
     data = step_input.previous_step_content
 
     if data.get("error"):

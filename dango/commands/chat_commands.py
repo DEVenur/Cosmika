@@ -10,7 +10,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from ..steps.call_agent import deep_agent
+from ..steps import call_agent as _call_agent_step
 from ..tools.discord_tool import ContextMenuDef
 from ..utils.discord_helpers import format_reply_context
 
@@ -364,7 +364,7 @@ class ChatCog(commands.Cog):
         future conversation history.
         """
         try:
-            if deep_agent is None:
+            if _call_agent_step.deep_agent is None:
                 await interaction.response.send_message(
                     "❌ `DEEP_MODEL` is not configured — `/deep` is unavailable.",
                     ephemeral=True,
