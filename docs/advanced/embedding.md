@@ -11,6 +11,72 @@ tags:
 
 Dango's agent lives in a standard discord.py Cog, so you can drop it into any existing bot. The bot keeps all its slash commands and prefix commands; Dango adds a natural-language layer on top.
 
+## Built-in features
+
+Dango ships with several AI capabilities that are available to any bot that imports it. All features are controlled by environment variables — no code changes required.
+
+### Chat
+
+The agent always responds to messages in allowed channels or DMs. It reads the conversation history automatically and replies in context.
+
+```env
+# Required — pick a model from any supported provider
+FAST_MODEL=google:gemini-2.0-flash
+FAST_API_KEY=your_api_key_here
+```
+
+That's the minimum. Everything below is opt-in.
+
+### Web search
+
+Set `ENABLE_DUCKDUCKGO=on` to let the agent search the web when it needs up-to-date information:
+
+```env
+ENABLE_DUCKDUCKGO=on
+```
+
+No API key needed. The agent decides on its own when to search — users don't have to ask explicitly.
+
+You can also enable `ENABLE_WEBSITE_TOOLS=on` to let the agent fetch and read the content of URLs that appear in messages:
+
+```env
+ENABLE_WEBSITE_TOOLS=on
+```
+
+### Workspace (file read access)
+
+The Workspace tool gives the agent read-only access to a local directory. Useful for bots that want the agent to answer questions about documentation, logs, or any files on the host machine.
+
+```env
+ENABLE_WORKSPACE=on
+WORKSPACE_ROOT=workspace   # optional — defaults to ./workspace relative to the bot's working directory
+```
+
+The agent can **read**, **list**, and **search** files inside `WORKSPACE_ROOT`. Write access is intentionally disabled.
+
+### Full `.env` example
+
+```env
+# Model
+FAST_MODEL=google:gemini-2.0-flash
+FAST_API_KEY=your_api_key_here
+
+# Optional: deeper model for complex questions (falls back to FAST_MODEL if not set)
+DEEP_MODEL=google:gemini-2.5-pro
+DEEP_API_KEY=your_api_key_here
+
+# Built-in tools
+ENABLE_DUCKDUCKGO=on
+ENABLE_WEBSITE_TOOLS=on
+ENABLE_WORKSPACE=on
+WORKSPACE_ROOT=workspace
+
+# Bot behaviour
+CHAT_SYS_PROMPT_PATH=config/chat_sys_prompt.txt
+```
+
+---
+
 ## Installation
 
 ```bash
