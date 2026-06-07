@@ -13,7 +13,8 @@ No database setup required — mount a folder of docs and the bot answers from t
 ## What it can do
 
 - **Use any AI provider** — set `FAST_MODEL` to `provider:model_id` (e.g. `google:gemini-2.5-flash`, `openai:gpt-4o`, `anthropic:claude-sonnet-4-20250514`, `groq:llama-3.3-70b-versatile`) and the bot figures out the right SDK and API key automatically.
-- **Run locally** — point `FAST_MODEL` at a local Ollama or LM Studio instance and set `FAST_BASE_URL` to its address. Running the bot in Docker while the model server is on the host? Use `http://host.docker.internal:<port>` and it just works.
+- **Run locally** — point `FAST_MODEL` (or `DEEP_MODEL`) at a local Ollama or LM Studio instance and set `FAST_BASE_URL` (or `DEEP_BASE_URL`) to its address. Running the bot in Docker while the model server is on the host? Use `http://host.docker.internal:<port>` and it just works.
+- **Fast/Deep Auto Route** *(beta)* — the bot automatically picks the fast or deep model based on the request; no manual switching needed.
 - **Understands images** — users can attach images to their messages; the bot passes them straight to the model.
 - **Gets reply context** — when someone replies to a Discord message, the quoted content is woven into the prompt naturally.
 - **Renders tables** — any markdown table in the bot's reply is auto-converted to a PNG image (with CJK font support).

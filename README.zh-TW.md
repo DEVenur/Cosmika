@@ -13,7 +13,8 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 ## 能做什麼
 
 - **支援任意 AI Provider** — 設定 `FAST_MODEL` 為 `provider:model_id`（例如 `google:gemini-2.5-flash`、`openai:gpt-4o`、`anthropic:claude-sonnet-4-20250514`、`groq:llama-3.3-70b-versatile`），Bot 自動找對應的 SDK 和 API Key。
-- **跑本地模型** — 把 `FAST_MODEL` 指向本地的 Ollama 或 LM Studio，設好 `FAST_BASE_URL` 就能用。Bot 在 Docker 裡、模型在主機上？用 `http://host.docker.internal:<port>` 直接通。
+- **跑本地模型** — 把 `FAST_MODEL`（或 `DEEP_MODEL`）指向本地的 Ollama 或 LM Studio，設好 `FAST_BASE_URL`（或 `DEEP_BASE_URL`）就能用。Bot 在 Docker 裡、模型在主機上？用 `http://host.docker.internal:<port>` 直接通。
+- **Fast/Deep Auto Route** *（beta）* — Bot 自動根據請求選用快速或深度模型，不需手動切換。
 - **看得懂圖片** — 使用者附上圖片，Bot 直接送給模型處理。
 - **理解 Discord 回覆** — 有人回覆某則訊息時，被引用的內容會自然地融入 prompt。
 - **表格變圖片** — Bot 回覆裡的 Markdown 表格自動渲染成 PNG（支援中日韓字型），手機上也看得清楚。
@@ -28,8 +29,8 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 
 已經有 Discord Bot 了嗎？
 
-- **可嵌入** — 整個功能是標準 discord.py Cog，幾行程式碼就能把 Dango 的 Agent 和 slash commands 塞進現有 Bot。
-- **指令變工具** — 用 `@discord_tool` 包裝你 Bot 現有的指令，Agent 就能代替使用者呼叫它們。原本的指令完全不受影響——舉例來說，`!play` / `/play` 還是照常運作，但使用者現在也可以直接說「放點輕音樂」，Agent 自己決定什麼時候呼叫。
+- **可嵌入** (Beta) — 整個功能是標準 discord.py Cog，幾行程式碼就能把 Dango 的 Agent 和 slash commands 塞進現有 Bot。
+- **指令變工具** *(開發中)* — 用 `@discord_tool` 包裝你 Bot 現有的指令，Agent 就能代替使用者呼叫它們。原本的指令完全不受影響——舉例來說，`!play` / `/play` 還是照常運作，但使用者現在也可以直接說「放點輕音樂」，Agent 自己決定什麼時候呼叫。
 
 ## 開始之前
 
