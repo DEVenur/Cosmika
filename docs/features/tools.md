@@ -1,5 +1,5 @@
 ---
-description: "Extend Dango with web search (DuckDuckGo), URL fetching, workspace file access, custom HTTP API tools, and SQL database queries — all configurable from the web dashboard."
+description: "Extend Dango with web search (DuckDuckGo, Brave Search), URL fetching, workspace file access, custom HTTP API tools, and SQL database queries — all configurable from the web dashboard."
 tags:
   - Tools
   - Web search
@@ -18,6 +18,17 @@ ENABLE_DUCKDUCKGO=on
 ```
 
 The bot gets a `duckduckgo_search` tool and uses it when the model decides a web search would help answer a question.
+
+## Web Search (Brave Search API)
+
+Higher-quality web search via the official [Brave Search API](https://brave.com/search/api/). Requires an API key — a free tier (2,000 queries/month) is available.
+
+```env
+ENABLE_BRAVE_SEARCH=on
+BRAVE_API_KEY=your-key-here
+```
+
+The bot gets a `brave_search` tool. Both search tools can be enabled at the same time; the model picks per query. In the web dashboard, the toggle and API key field are under **Models → Features**.
 
 ## Website Tool
 

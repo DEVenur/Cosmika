@@ -53,6 +53,8 @@ def inject_config_to_env() -> str | None:
 
     # ── Web / search tools ────────────────────────────────────────────────────
     _set("ENABLE_DUCKDUCKGO",      _onoff(cfg.get("enable_duckduckgo", False)))
+    _set("ENABLE_BRAVE_SEARCH",    _onoff(cfg.get("enable_brave_search", False)))
+    _set("BRAVE_API_KEY",          cfg.get("brave_api_key"))
     _set("ENABLE_WEBSITE_TOOLS",   _onoff(cfg.get("enable_website_tools", False)))
 
     # ── Custom tools ──────────────────────────────────────────────────────────

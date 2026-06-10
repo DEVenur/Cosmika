@@ -383,6 +383,24 @@
               {% if config.enable_duckduckgo %}checked{% endif %} />
           </div>
 
+          <div class="px-4 py-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium">Brave Search</p>
+                <p class="text-xs text-base-content/45">Let the bot search the web via the Brave Search API (free tier available, API key required)</p>
+              </div>
+              <input type="checkbox" name="enable_brave_search" value="on"
+                class="toggle toggle-primary toggle-sm"
+                {% if config.enable_brave_search %}checked{% endif %} />
+            </div>
+            <div class="mt-2">
+              <input name="brave_api_key" type="password"
+                placeholder="{% if config.brave_api_key %}Key saved — leave blank to keep{% else %}Brave API key — get one at brave.com/search/api{% endif %}"
+                class="input input-bordered input-sm font-mono w-full"
+                autocomplete="new-password" />
+            </div>
+          </div>
+
           <div class="flex justify-between items-center px-4 py-3">
             <div>
               <p class="text-sm font-medium">Website Reader</p>

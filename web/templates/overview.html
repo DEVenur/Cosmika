@@ -118,11 +118,12 @@
           {% if config.enable_contextual_system_prompt %}<span class="badge badge-sm badge-outline">Context Prompt</span>{% endif %}
           {% if config.gemini_search %}<span class="badge badge-sm badge-outline">Google Search</span>{% endif %}
           {% if config.enable_duckduckgo %}<span class="badge badge-sm badge-outline">DuckDuckGo</span>{% endif %}
+          {% if config.enable_brave_search %}<span class="badge badge-sm badge-outline">Brave Search</span>{% endif %}
           {% if config.enable_website_tools %}<span class="badge badge-sm badge-outline">Web Reader</span>{% endif %}
           {% if config.enable_workspace %}<span class="badge badge-sm badge-outline">Workspace</span>{% endif %}
           {% if config.custom_apis %}<span class="badge badge-sm badge-outline">{{ config.custom_apis|length }} API{{ 's' if config.custom_apis|length != 1 }}</span>{% endif %}
           {% if config.sql_databases %}<span class="badge badge-sm badge-outline">{{ config.sql_databases|length }} DB{{ 's' if config.sql_databases|length != 1 }}</span>{% endif %}
-          {% if not (config.auto_route or config.fallback_on_error or config.enable_contextual_system_prompt or config.gemini_search or config.enable_duckduckgo or config.enable_website_tools or config.enable_workspace or config.custom_apis or config.sql_databases) %}
+          {% if not (config.auto_route or config.fallback_on_error or config.enable_contextual_system_prompt or config.gemini_search or config.enable_duckduckgo or config.enable_brave_search or config.enable_website_tools or config.enable_workspace or config.custom_apis or config.sql_databases) %}
           <span class="text-xs text-base-content/35 italic">None</span>
           {% endif %}
         </div>

@@ -123,6 +123,8 @@ WORKSPACE_ALLOWED: list[str] = ["read", "list", "search"]
 
 # ── Web / search tools ────────────────────────────────────────────────────────
 ENABLE_DUCKDUCKGO = env_onoff_to_bool(os.getenv("ENABLE_DUCKDUCKGO"))
+ENABLE_BRAVE_SEARCH = env_onoff_to_bool(os.getenv("ENABLE_BRAVE_SEARCH"))
+BRAVE_API_KEY = os.getenv("BRAVE_API_KEY")
 ENABLE_WEBSITE_TOOLS = env_onoff_to_bool(os.getenv("ENABLE_WEBSITE_TOOLS"))
 
 # ── Custom tools ──────────────────────────────────────────────────────────────
@@ -304,6 +306,60 @@ def _make_search_tools():
     return _DangoSearchTools(backend="auto")
 
 
+def _make_brave_search_tool(api_key: str):
+    """Brave Search API tool (https://api.search.brave.com).
+
+    Implemented directly with requests instead of agno.tools.bravesearch:
+    the latter requires the unmaintained `brave-search` package, whose broken
+    httpx metadata cannot be resolved by uv.
+    """
+    import asyncio
+    import json as _json
+    import requests as _requests
+    from agno.tools import tool
+
+    async def _fn(query: str, max_results: int = 5,
+                  country: str = "US", search_lang: str = "en") -> str:
+        r = await asyncio.to_thread(
+            _requests.get,
+            "https://api.search.brave.com/res/v1/web/search",
+            params={
+                "q": query,
+                "count": min(max_results, 20),
+                "country": country,
+                "search_lang": search_lang,
+            },
+            headers={
+                "Accept": "application/json",
+                "X-Subscription-Token": api_key,
+            },
+            timeout=15,
+        )
+        if r.status_code != 200:
+            return f"Brave Search error (HTTP {r.status_code}): {r.text[:300]}"
+        results = [
+            {
+                "title": item.get("title", ""),
+                "url": item.get("url", ""),
+                "description": item.get("description", ""),
+            }
+            for item in r.json().get("web", {}).get("results", [])
+        ]
+        if not results:
+            return "No search results — try a different query."
+        return _json.dumps(results, ensure_ascii=False, indent=2)
+
+    return tool(
+        name="brave_search",
+        description=(
+            "Search the web with the Brave Search API. "
+            "Args: query (str), max_results (int, default 5, max 20), "
+            "country (two-letter code, default 'US'), "
+            "search_lang (language code, default 'en'; use e.g. 'zh-hant' for Traditional Chinese)."
+        ),
+    )(_fn)
+
+
 def _make_website_tools():
     """Website toolkit with separate single-page and crawl tools.
 
@@ -425,6 +481,11 @@ def _make_agent(model: _DangoGemini | object | str) -> Agent:
         tools.append(Workspace(WORKSPACE_ROOT, allowed=WORKSPACE_ALLOWED))
     if ENABLE_DUCKDUCKGO:
         tools.append(_make_search_tools())
+    if ENABLE_BRAVE_SEARCH:
+        if BRAVE_API_KEY:
+            tools.append(_make_brave_search_tool(BRAVE_API_KEY))
+        else:
+            print("⚠️  ENABLE_BRAVE_SEARCH is on but BRAVE_API_KEY is not set — Brave Search disabled")
     if ENABLE_WEBSITE_TOOLS:
         tools.append(_make_website_tools())
     if ENABLE_CUSTOM_APIS:

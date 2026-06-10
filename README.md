@@ -23,6 +23,7 @@ And that's not all — you can also give it tools:
 
 - **Workspace file access** — mount a local folder and the bot becomes your team's living reference. Custom game data, shared docs, community wikis, internal FAQs — members ask, the bot answers from your own files.
 - **DuckDuckGo search** — free web search that works with any model provider (`ENABLE_DUCKDUCKGO=on`, no API key needed).
+- **Brave Search** — higher-quality web search via the official Brave Search API (`ENABLE_BRAVE_SEARCH=on` + `BRAVE_API_KEY`, free tier available).
 - **Website tool** — lets the bot fetch and read URLs from the conversation, for any provider.
 - **Custom API tools** — plug any HTTP API into the bot through the web dashboard; no code changes needed.
 - **SQL database tools** — add a database connection string in the dashboard and the bot gets `list_tables` + `run_query` tools automatically.
@@ -351,7 +352,7 @@ Full docs at **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)*
 |---|---|
 | [Environment Variables](https://zhiro-labs.github.io/dango/configuration/env-vars/) | Every config option with defaults — models, routing, tools, Gemini settings |
 | [Model Providers & Routing](https://zhiro-labs.github.io/dango/features/models/) | Supported providers, dual-model AUTO_ROUTE, error fallback, local models |
-| [Tools](https://zhiro-labs.github.io/dango/features/tools/) | Workspace, DuckDuckGo, website fetching, custom APIs, SQL databases |
+| [Tools](https://zhiro-labs.github.io/dango/features/tools/) | Workspace, DuckDuckGo, Brave Search, website fetching, custom APIs, SQL databases |
 | [Embedding into Another Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | Load the Cogs, expose your commands as Agno tools with `@discord_tool` |
 | [Workflow Architecture](https://zhiro-labs.github.io/dango/features/workflow/) | How the 4-step Agno pipeline works under the hood |
 | [VPS Deployment](https://zhiro-labs.github.io/dango/advanced/vps/) | Run on a server safely with SSH tunneling |

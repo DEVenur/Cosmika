@@ -72,6 +72,8 @@ When the bot runs in Docker and the model server runs on the host, use `host.doc
 | Variable | Default | Description |
 |---|---|---|
 | `ENABLE_DUCKDUCKGO` | `off` | **`on`/`off`** — free DuckDuckGo search, works with any provider |
+| `ENABLE_BRAVE_SEARCH` | `off` | **`on`/`off`** — web search via the Brave Search API (requires `BRAVE_API_KEY`) |
+| `BRAVE_API_KEY` | — | Brave Search API key; free tier at [brave.com/search/api](https://brave.com/search/api/) |
 | `ENABLE_WEBSITE_TOOLS` | `off` | **`on`/`off`** — let the bot fetch and read URLs from the conversation |
 
 ## Workspace

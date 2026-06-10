@@ -41,6 +41,8 @@ class BotConfig(BaseModel):
 
     # ── Web / search tools ────────────────────────────────────────────────────
     enable_duckduckgo: bool = False
+    enable_brave_search: bool = False
+    brave_api_key: str = ""
     enable_website_tools: bool = False
 
     # ── Custom tools ──────────────────────────────────────────────────────────

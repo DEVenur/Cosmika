@@ -23,6 +23,7 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 
 - **Workspace 知識庫** — 掛載本地資料夾，Bot 就成了整個團隊的活知識庫。自訂遊戲資料、共用文件、社群 Wiki、內部 FAQ——成員直接問，Bot 從你的檔案裡回答。
 - **DuckDuckGo 搜尋** — 免費網路搜尋，支援所有 Provider（`ENABLE_DUCKDUCKGO=on`，不需 API Key）。
+- **Brave Search** — 透過官方 Brave Search API 提供更高品質的網路搜尋（`ENABLE_BRAVE_SEARCH=on` + `BRAVE_API_KEY`，有免費方案）。
 - **網頁工具** — 讓 Bot 抓取並閱讀對話中出現的 URL，支援所有 Provider。
 - **Custom API 工具** — 在 Web Dashboard 貼上 URL，Bot 就能呼叫你的 API，不需要改程式碼。
 - **SQL 資料庫工具** — 貼上連線字串，Bot 自動獲得 `list_tables` 和 `run_query` 工具。
@@ -351,7 +352,7 @@ uv add git+https://github.com/zhiro-labs/dango
 |---|---|
 | [環境變數](https://zhiro-labs.github.io/dango/configuration/env-vars/) | 所有設定選項與預設值——模型、路由、工具、Gemini 專屬設定 |
 | [模型 Provider 與路由](https://zhiro-labs.github.io/dango/features/models/) | 支援的 Provider、雙模型 AUTO_ROUTE、錯誤回退、本地模型 |
-| [工具](https://zhiro-labs.github.io/dango/features/tools/) | Workspace、DuckDuckGo、網頁抓取、Custom API、SQL 資料庫 |
+| [工具](https://zhiro-labs.github.io/dango/features/tools/) | Workspace、DuckDuckGo、Brave Search、網頁抓取、Custom API、SQL 資料庫 |
 | [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | 載入 Cog、用 `@discord_tool` 把指令包成 Agno 工具 |
 | [Workflow 架構](https://zhiro-labs.github.io/dango/features/workflow/) | 四步驟 Agno pipeline 的內部運作方式 |
 | [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) | 用 SSH 通道安全地在伺服器上運行 |

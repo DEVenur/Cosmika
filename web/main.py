@@ -434,6 +434,8 @@ async def save_features(
     fallback_on_error: str = Form("off"),
     enable_contextual_system_prompt: str = Form("off"),
     enable_duckduckgo: str = Form("off"),
+    enable_brave_search: str = Form("off"),
+    brave_api_key: str = Form(""),
     enable_website_tools: str = Form("off"),
 ):
     config = load_config()
@@ -441,6 +443,9 @@ async def save_features(
     config.fallback_on_error = fallback_on_error == "on"
     config.enable_contextual_system_prompt = enable_contextual_system_prompt == "on"
     config.enable_duckduckgo = enable_duckduckgo == "on"
+    config.enable_brave_search = enable_brave_search == "on"
+    if brave_api_key.strip():
+        config.brave_api_key = brave_api_key.strip()
     config.enable_website_tools = enable_website_tools == "on"
     save_config(config)
     return _SAVED_R
