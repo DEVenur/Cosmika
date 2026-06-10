@@ -251,6 +251,8 @@ def _make_model(model_str: str, api_key: str | None, prefix: str, base_url: str 
                 f"force-setting attribute '{base_url}'. Behaviour depends on provider implementation."
             )
             instance.base_url = base_url
+        if api_key and hasattr(instance, "api_key"):
+            instance.api_key = api_key
         return instance
 
     return model_str
