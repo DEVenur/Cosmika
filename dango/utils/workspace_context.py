@@ -128,7 +128,11 @@ async def init(root: str, sys_prompt_path: str) -> None:
     else:
         if path.exists():
             print("📂 Workspace files changed — regenerating system prompt...")
-        _context = await _generate_and_save(sys_prompt_path)
+        try:
+            _context = await _generate_and_save(sys_prompt_path)
+        except Exception as e:
+            print(f"⚠️  Workspace system prompt generation failed: {e}")
+            _context = path.read_text(encoding="utf-8").strip() if path.exists() else ""
         if _context:
             _save_fingerprint(sys_prompt_path, _fingerprint)
 
