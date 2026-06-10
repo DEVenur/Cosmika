@@ -258,6 +258,32 @@ def _make_model(model_str: str, api_key: str | None, prefix: str, base_url: str 
     return model_str
 
 
+def _make_website_tools():
+    """WebsiteTools whose read_url fetches only the requested page.
+
+    Agno's stock read_url uses WebsiteReader() defaults (max_depth=3,
+    max_links=10), which spiders linked pages — one URL in a chat message can
+    trigger dozens of slow follow-up requests. A single page is all the chat
+    use case needs.
+    """
+    import json as _json
+    from agno.tools.website import WebsiteTools
+
+    class _SinglePageWebsiteTools(WebsiteTools):
+        def read_url(self, url: str) -> str:
+            """This function reads a url and returns the content.
+
+            :param url: The url of the website to read.
+            :return: Relevant documents from the website.
+            """
+            from agno.knowledge.reader.website_reader import WebsiteReader
+
+            docs = WebsiteReader(max_depth=1, max_links=1).read(url=url)
+            return _json.dumps([doc.to_dict() for doc in docs])
+
+    return _SinglePageWebsiteTools()
+
+
 def _make_api_tool(name: str, base_url: str, api_key: str, description: str = ""):
     """Build a uniquely-named HTTP tool for one custom API config."""
     import asyncio
@@ -335,8 +361,7 @@ def _make_agent(model: _DangoGemini | object | str) -> Agent:
         from agno.tools.duckduckgo import DuckDuckGoTools
         tools.append(DuckDuckGoTools())
     if ENABLE_WEBSITE_TOOLS:
-        from agno.tools.website import WebsiteTools
-        tools.append(WebsiteTools())
+        tools.append(_make_website_tools())
     if ENABLE_CUSTOM_APIS:
         for api_cfg in _CUSTOM_APIS:
             tools.append(_make_api_tool(
