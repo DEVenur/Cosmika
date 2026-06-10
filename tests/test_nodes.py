@@ -116,9 +116,13 @@ class TestBuildInstructions:
 class TestCreateDiscordWorkflow:
     """Tests for create_discord_workflow factory."""
 
-    def test_creates_workflow(self):
-        from dango.workflow import create_discord_workflow
+    def test_creates_workflow(self, monkeypatch):
+        import dango.workflow as workflow_module
 
-        wf = create_discord_workflow()
+        # FAST_MODEL is read at import time, so patch agent initialization
+        # instead of the environment to keep the test env-independent.
+        monkeypatch.setattr(workflow_module, "_initialize_agents", lambda: None)
+
+        wf = workflow_module.create_discord_workflow()
         assert wf is not None
         assert wf.name == "DiscordAIPipeline"
