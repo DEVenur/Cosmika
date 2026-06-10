@@ -258,6 +258,52 @@ def _make_model(model_str: str, api_key: str | None, prefix: str, base_url: str 
     return model_str
 
 
+def _make_search_tools():
+    """Web search toolkit with multi-engine fallback and clean no-result handling.
+
+    DuckDuckGoTools pins backend="duckduckgo"; when that one engine returns
+    nothing (common for non-English queries) or rate-limits, ddgs raises
+    DDGSException straight into the run log. backend="auto" rotates across
+    engines (google, bing, brave, duckduckgo, ...), and a genuine no-result
+    outcome is returned to the model as a plain message instead of an error.
+    """
+    from agno.tools.websearch import WebSearchTools
+    from ddgs.exceptions import DDGSException
+
+    class _DangoSearchTools(WebSearchTools):
+        def web_search(self, query: str, max_results: int = 5) -> str:
+            """Use this function to search the web for a query.
+
+            Args:
+                query(str): The query to search for.
+                max_results (optional, default=5): The maximum number of results to return.
+
+            Returns:
+                The search results from the web.
+            """
+            try:
+                return super().web_search(query, max_results)
+            except DDGSException as e:
+                return f"No search results: {e}"
+
+        def search_news(self, query: str, max_results: int = 5) -> str:
+            """Use this function to get the latest news from the web.
+
+            Args:
+                query(str): The query to search for.
+                max_results (optional, default=5): The maximum number of results to return.
+
+            Returns:
+                The latest news from the web.
+            """
+            try:
+                return super().search_news(query, max_results)
+            except DDGSException as e:
+                return f"No news results: {e}"
+
+    return _DangoSearchTools(backend="auto")
+
+
 def _make_website_tools():
     """Website toolkit with separate single-page and crawl tools.
 
@@ -378,8 +424,7 @@ def _make_agent(model: _DangoGemini | object | str) -> Agent:
         from agno.tools.workspace import Workspace
         tools.append(Workspace(WORKSPACE_ROOT, allowed=WORKSPACE_ALLOWED))
     if ENABLE_DUCKDUCKGO:
-        from agno.tools.duckduckgo import DuckDuckGoTools
-        tools.append(DuckDuckGoTools())
+        tools.append(_make_search_tools())
     if ENABLE_WEBSITE_TOOLS:
         tools.append(_make_website_tools())
     if ENABLE_CUSTOM_APIS:
