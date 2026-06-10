@@ -259,29 +259,49 @@ def _make_model(model_str: str, api_key: str | None, prefix: str, base_url: str 
 
 
 def _make_website_tools():
-    """WebsiteTools whose read_url fetches only the requested page.
+    """Website toolkit with separate single-page and crawl tools.
 
-    Agno's stock read_url uses WebsiteReader() defaults (max_depth=3,
-    max_links=10), which spiders linked pages — one URL in a chat message can
-    trigger dozens of slow follow-up requests. A single page is all the chat
-    use case needs.
+    Agno's stock WebsiteTools.read_url uses WebsiteReader() defaults
+    (max_depth=3, max_links=10), which spiders linked pages — one URL in a
+    chat message can trigger dozens of slow follow-up requests. Splitting the
+    two modes lets the model pick: read_url for the common "what does this
+    page say" case, crawl_website when related pages are actually needed.
     """
     import json as _json
-    from agno.tools.website import WebsiteTools
+    from agno.knowledge.reader.website_reader import WebsiteReader
+    from agno.tools import Toolkit
 
-    class _SinglePageWebsiteTools(WebsiteTools):
+    class _DangoWebsiteTools(Toolkit):
+        def __init__(self):
+            super().__init__(
+                name="website_tools",
+                tools=[self.read_url, self.crawl_website],
+            )
+
         def read_url(self, url: str) -> str:
-            """This function reads a url and returns the content.
+            """Read a single web page and return its content. Fast — fetches
+            only the given URL without following any links. Prefer this tool
+            whenever one page is enough.
 
-            :param url: The url of the website to read.
-            :return: Relevant documents from the website.
+            :param url: The url of the web page to read.
+            :return: Relevant documents from the page.
             """
-            from agno.knowledge.reader.website_reader import WebsiteReader
-
             docs = WebsiteReader(max_depth=1, max_links=1).read(url=url)
             return _json.dumps([doc.to_dict() for doc in docs])
 
-    return _SinglePageWebsiteTools()
+        def crawl_website(self, url: str) -> str:
+            """Crawl a website starting from the given URL, following
+            same-domain links a few pages deep. Slow (each page is fetched
+            sequentially) — use only when a single page is not enough, e.g.
+            gathering related articles or exploring a site's sections.
+
+            :param url: The starting url to crawl.
+            :return: Relevant documents from the crawled pages.
+            """
+            docs = WebsiteReader(max_depth=2, max_links=5).read(url=url)
+            return _json.dumps([doc.to_dict() for doc in docs])
+
+    return _DangoWebsiteTools()
 
 
 def _make_api_tool(name: str, base_url: str, api_key: str, description: str = ""):
