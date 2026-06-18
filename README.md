@@ -27,11 +27,11 @@ And that's not all — you can also give it tools:
 - **Website tool** — lets the bot fetch and read URLs from the conversation, for any provider.
 - **Custom API tools** — plug any HTTP API into the bot through the web dashboard; no code changes needed.
 - **SQL database tools** — add a database connection string in the dashboard and the bot gets `list_tables` + `run_query` tools automatically.
+- **Custom commands & tools (code)** — write your own in Python and drop them into a gitignored `custom/` folder. One function can be a slash command *and* a tool the agent calls itself — type `/stock AAPL`, or just ask "how's Apple doing?" and the agent calls it. See [Custom Commands & Tools](https://zhiro-labs.github.io/dango/features/extensions/).
 
 Already have a Discord bot?
 
 - **Embeddable** (Beta) — the whole thing is a standard discord.py Cog; drop Dango's agent and slash commands into any existing bot in a few lines.
-- **Commands as tools** *(in development)* — wrap your bot's existing commands with `@discord_tool` and the agent can call them on behalf of users. Your original commands keep working unchanged — for example, `!play` / `/play` still work as before, but users can now also just ask "play some lofi" and the agent handles it.
 
 ## Before you start
 
@@ -307,7 +307,7 @@ ssh -L 17860:localhost:17860 user@your-vps-ip
 
 ## Embedding into Another Bot
 
-Everything is a standard discord.py Cog, so you can drop Dango's agent and slash commands into any existing bot. You can also expose your own bot's commands as Agno tools — users ask naturally ("play some lofi") and the agent decides when to call them.
+Everything is a standard discord.py Cog, so you can drop Dango's agent and slash commands into any existing bot. To add your own commands and agent tools — including ones the agent can call itself — see [Custom Commands & Tools](https://zhiro-labs.github.io/dango/features/extensions/).
 
 ```bash
 uv add git+https://github.com/zhiro-labs/dango
@@ -353,7 +353,8 @@ Full docs at **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)*
 | [Environment Variables](https://zhiro-labs.github.io/dango/configuration/env-vars/) | Every config option with defaults — models, routing, tools, Gemini settings |
 | [Model Providers & Routing](https://zhiro-labs.github.io/dango/features/models/) | Supported providers, dual-model AUTO_ROUTE, error fallback, local models |
 | [Tools](https://zhiro-labs.github.io/dango/features/tools/) | Workspace, DuckDuckGo, Brave Search, website fetching, custom APIs, SQL databases |
-| [Embedding into Another Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | Load the Cogs, expose your commands as Agno tools with `@discord_tool` |
+| [Custom Commands & Tools](https://zhiro-labs.github.io/dango/features/extensions/) | Write your own slash commands and agent tools in Python in a gitignored `custom/` folder |
+| [Embedding into Another Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | Load the Cogs into an existing discord.py bot |
 | [Workflow Architecture](https://zhiro-labs.github.io/dango/features/workflow/) | How the 4-step Agno pipeline works under the hood |
 | [VPS Deployment](https://zhiro-labs.github.io/dango/advanced/vps/) | Run on a server safely with SSH tunneling |
 

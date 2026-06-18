@@ -45,3 +45,10 @@ Requires the **Administrator** server permission. All responses are ephemeral (o
 | `/settimezone` | `<tz>` | Timezone for timestamps injected into the system prompt. Supports autocomplete. |
 | `/setactivity` | `<text>` | Bot's Discord activity status (max 128 characters). Persists across restarts. |
 | `/refreshmetadata` | — | Refresh stored display names for all saved channels and users |
+
+## Custom
+
+Write your own slash commands in Python and drop them into the gitignored
+`custom/` directory. A single function can be a slash command, an agent tool, or
+both at once — so the same `/stock` you can type, the bot can also call itself
+mid-conversation. See [Custom Commands & Tools](../features/extensions.md).

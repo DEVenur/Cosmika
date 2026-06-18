@@ -1,6 +1,7 @@
 # API Reference
 
-All public symbols are re-exported from the `dango` top-level package. You can import everything from `dango` directly — you never need to reach into sub-modules.
+The core embedding symbols are re-exported from the `dango` top-level package.
+The custom-extension SDK lives in `dango.extensions`.
 
 ## Quick import table
 
@@ -15,25 +16,10 @@ from dango import (
 
     # Config
     RuntimeConfig,
-
-    # Tool decorator & context
-    discord_tool,
-    RunContext,
-    ContextMenuDef,
-
-    # Context accessors
-    get_discord_context,
-    get_discord_bot,
-    get_discord_interaction,
-
-    # Response helpers
-    set_ephemeral,
-    set_discord_response,
-
-    # Permission helpers
-    check_roles,
-    check_permissions,
 )
+
+# Custom commands & tools (used inside custom/*.py — see the feature guide)
+from dango.extensions import command, agent_tool, command_and_tool, Ctx
 ```
 
 ## Where things live
@@ -44,22 +30,16 @@ from dango import (
 | `AdminCog` | `from dango import AdminCog` | `from dango.commands import AdminCog` |
 | `create_discord_workflow` | `from dango import create_discord_workflow` | `from dango.workflow import create_discord_workflow` |
 | `RuntimeConfig` | `from dango import RuntimeConfig` | `from dango.utils.runtime_config import RuntimeConfig` |
-| `discord_tool` | `from dango import discord_tool` | `from dango.tools import discord_tool` |
-| `RunContext` | `from dango import RunContext` | `from dango.tools import RunContext` |
-| `ContextMenuDef` | `from dango import ContextMenuDef` | `from dango.tools import ContextMenuDef` |
-| `get_discord_context` | `from dango import get_discord_context` | `from dango.tools import get_discord_context` |
-| `get_discord_bot` | `from dango import get_discord_bot` | `from dango.tools import get_discord_bot` |
-| `get_discord_interaction` | `from dango import get_discord_interaction` | `from dango.tools import get_discord_interaction` |
-| `set_ephemeral` | `from dango import set_ephemeral` | `from dango.tools import set_ephemeral` |
-| `set_discord_response` | `from dango import set_discord_response` | `from dango.tools import set_discord_response` |
-| `check_roles` | `from dango import check_roles` | `from dango.tools import check_roles` |
-| `check_permissions` | `from dango import check_permissions` | `from dango.tools import check_permissions` |
+| `command` | — | `from dango.extensions import command` |
+| `agent_tool` | — | `from dango.extensions import agent_tool` |
+| `command_and_tool` | — | `from dango.extensions import command_and_tool` |
+| `Ctx` | — | `from dango.extensions import Ctx` |
 
-## Symbol reference
+## Core symbols
 
 ### `ChatCog`
 
-Discord.py Cog that handles incoming messages and interactions. Wraps the Agno workflow and routes Discord events into the four-step pipeline.
+Discord.py Cog that handles incoming messages. Wraps the Agno workflow and routes Discord events into the four-step pipeline.
 
 **Constructor:**
 
@@ -69,8 +49,6 @@ ChatCog(
     discord_workflow: Workflow,
     chat_system_prompt: str,
     runtime_config: RuntimeConfig,
-    extra_tools: list | None = None,
-    context_menu_defs: list[ContextMenuDef] | None = None,
 )
 ```
 
@@ -92,36 +70,49 @@ Creates and returns the Agno `Workflow` object. Call once at startup; pass the r
 
 Loads and manages `config/runtime.yml`. Stores allowed channels, allowed DM users, history limit, timezone, and activity string. Pass the same instance to both `ChatCog` and `AdminCog`.
 
-### `discord_tool`
+## Custom extensions (`dango.extensions`)
 
-Decorator that wraps an async or sync function as an Agno tool. See [Embedding — Wrapping commands as tools](../advanced/embedding.md#wrapping-commands-as-tools) for the full rules.
+These are what you use inside `custom/*.py`. See
+[Custom Commands & Tools](../features/extensions.md) for the full guide.
 
-### `RunContext`
+### Decorators
 
-Type alias for the Agno `RunContext`. Add it as the last parameter of any `@discord_tool` function — Agno injects it automatically and it is not exposed to the LLM.
+Each decorator registers a function and supports bare usage (`@command`),
+positional (`@command("name")`), or keyword (`@command(name=..., description=...)`).
 
-### `ContextMenuDef`
+| Decorator | Discord slash command | Agent tool |
+|---|:---:|:---:|
+| `command(name=None, description="")` | ✅ | ❌ |
+| `agent_tool(name=None, description="")` | ❌ | ✅ |
+| `command_and_tool(name=None, description="")` | ✅ | ✅ |
 
-Dataclass for registering right-click context menu commands. See [Embedding — Context menu commands](../advanced/embedding.md#context-menu-commands).
+When `name` is omitted the function name is used; when `description` is omitted
+the first line of the docstring is used. A leading `ctx` parameter is optional
+and is stripped from the public command/tool schema.
 
-### Context accessors
+### `Ctx`
 
-| Function | Returns |
+Dataclass describing where a function was invoked from, passed as the first
+argument when the function declares `ctx`.
+
+| Attribute | Type |
 |---|---|
-| `get_discord_context(run_context)` | `dict` with `author_id`, `author_name`, `author_roles`, `channel_id`, `channel_name`, `guild_id`, `guild_name` |
-| `get_discord_bot(run_context)` | `discord.Client` — the bot instance |
-| `get_discord_interaction(run_context)` | `discord.Interaction \| None` — present for button/modal/context-menu requests, `None` for regular messages |
+| `source` | `str` — `"discord_command"` or `"agent"` |
+| `author_name` | `str` |
+| `author_id` | `int \| None` |
+| `channel_id` | `int \| None` |
+| `channel_name` | `str` |
+| `guild_id` | `int \| None` |
+| `guild_name` | `str` |
+| `interaction` | `discord.Interaction \| None` (command path only) |
+| `bot` | `commands.Bot \| None` (command path only) |
 
-### Response helpers
+### Loader functions
+
+Called by the app at startup; you normally don't call these yourself.
 
 | Function | Effect |
 |---|---|
-| `set_ephemeral(run_context)` | Makes the response visible only to the invoking user (Interactions only) |
-| `set_discord_response(run_context, embeds=None, suppress_text=False)` | Attach `discord.Embed` objects and/or suppress the LLM text output |
-
-### Permission helpers
-
-| Function | Returns |
-|---|---|
-| `check_roles(run_context, any_of=None, all_of=None)` | Error string if check fails, `None` if it passes |
-| `check_permissions(run_context, any_of=None, all_of=None)` | Error string if check fails, `None` if it passes |
+| `load_custom_modules()` | Import every `custom/*.py` once so decorators register. Idempotent. |
+| `get_custom_tools()` | Return the registered tools as Agno tool objects for the agent. |
+| `register_custom_commands(bot)` | Add the registered slash commands to `bot.tree`; returns the count. |

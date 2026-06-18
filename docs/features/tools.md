@@ -9,6 +9,10 @@ tags:
 
 # Tools
 
+The tools on this page are **no-code** — turn them on with an env var or in the
+dashboard, no Python required. To write your own commands and agent tools in
+Python instead, see [Custom Commands & Tools](extensions.md).
+
 ## Web Search (DuckDuckGo)
 
 Free web search that works with any model provider — no API key required.
@@ -127,3 +131,19 @@ Fields per entry:
 | `name` | yes | Unique name for this database |
 | `db_url` | yes | SQLAlchemy connection string |
 | `description` | no | Helps the model understand what data is available |
+
+## Custom Code (Commands & Tools)
+
+Need something the no-code tools above can't express? Write it in Python. Drop a
+file into the gitignored `custom/` directory and a single function can become a
+Discord slash command, an agent tool, or both at once:
+
+```python
+from dango.extensions import command_and_tool, Ctx
+
+@command_and_tool(name="stock", description="Get a stock quote by ticker")
+async def stock(ctx: Ctx, ticker: str) -> str:
+    ...
+```
+
+See [Custom Commands & Tools](extensions.md) for the full guide.

@@ -94,6 +94,10 @@ See [Tools](../features/tools.md) for more on workspace behaviour.
 | `CUSTOM_APIS_JSON` | `[]` | JSON array of REST API configs (`name`, `base_url`, `api_key`, `description`). **Must be a single line** — see [Tools](../features/tools.md#custom-api-tools) |
 | `ENABLE_SQL_DATABASES` | `off` | **`on`/`off`** — enable SQL tools defined in `SQL_DATABASES_JSON` |
 | `SQL_DATABASES_JSON` | `[]` | JSON array of database configs (`name`, `db_url`, `description`) |
+| `CUSTOM_DIR` | `custom` | Directory scanned for Python extension files (`*.py`) — see [Custom Commands & Tools](../features/extensions.md) |
+
+For writing your own commands and agent tools in Python (no env var needed — just
+drop files into `custom/`), see [Custom Commands & Tools](../features/extensions.md).
 
 ## Google / Gemini-specific
 

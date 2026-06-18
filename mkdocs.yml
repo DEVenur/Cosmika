@@ -69,6 +69,7 @@ nav:
   - Features:
     - Model Providers & Routing: features/models.md
     - Tools: features/tools.md
+    - Custom Commands & Tools: features/extensions.md
     - Workflow Architecture: features/workflow.md
   - Usage:
     - Slash Commands: usage/commands.md

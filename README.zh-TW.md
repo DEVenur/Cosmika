@@ -27,11 +27,11 @@ Gemini、GPT-4o、Claude、Llama、本地 Ollama——通通支援，換模型�
 - **網頁工具** — 讓 Bot 抓取並閱讀對話中出現的 URL，支援所有 Provider。
 - **Custom API 工具** — 在 Web Dashboard 貼上 URL，Bot 就能呼叫你的 API，不需要改程式碼。
 - **SQL 資料庫工具** — 貼上連線字串，Bot 自動獲得 `list_tables` 和 `run_query` 工具。
+- **自訂指令與工具（程式碼）** — 用 Python 自己寫，丟進不受 git 追蹤的 `custom/` 資料夾。一個函式可以同時是 slash command 與 Agent 自己會呼叫的工具——你可以打 `/stock AAPL`，也可以直接問「蘋果最近怎樣？」讓 Agent 自己呼叫。詳見 [自訂指令與工具](https://zhiro-labs.github.io/dango/features/extensions/)。
 
 已經有 Discord Bot 了嗎？
 
 - **可嵌入** (Beta) — 整個功能是標準 discord.py Cog，幾行程式碼就能把 Dango 的 Agent 和 slash commands 塞進現有 Bot。
-- **指令變工具** *(開發中)* — 用 `@discord_tool` 包裝你 Bot 現有的指令，Agent 就能代替使用者呼叫它們。原本的指令完全不受影響——舉例來說，`!play` / `/play` 還是照常運作，但使用者現在也可以直接說「放點輕音樂」，Agent 自己決定什麼時候呼叫。
 
 ## 開始之前
 
@@ -307,7 +307,7 @@ ssh -L 17860:localhost:17860 user@你的vps-ip
 
 ## 嵌入其他 Bot
 
-所有功能都是標準 discord.py Cog，可以把 Dango 的 Agent 和 slash commands 塞進現有的 Bot。你也可以把自己 Bot 的指令包成 Agno tool——使用者自然地提問（「放點輕音樂」），Agent 自己決定什麼時候呼叫。
+所有功能都是標準 discord.py Cog，可以把 Dango 的 Agent 和 slash commands 塞進現有的 Bot。想加入自己的指令與 Agent 工具（包含讓 Agent 自己呼叫的工具），請見 [自訂指令與工具](https://zhiro-labs.github.io/dango/features/extensions/)。
 
 ```bash
 uv add git+https://github.com/zhiro-labs/dango
@@ -353,7 +353,8 @@ uv add git+https://github.com/zhiro-labs/dango
 | [環境變數](https://zhiro-labs.github.io/dango/configuration/env-vars/) | 所有設定選項與預設值——模型、路由、工具、Gemini 專屬設定 |
 | [模型 Provider 與路由](https://zhiro-labs.github.io/dango/features/models/) | 支援的 Provider、雙模型 AUTO_ROUTE、錯誤回退、本地模型 |
 | [工具](https://zhiro-labs.github.io/dango/features/tools/) | Workspace、DuckDuckGo、Brave Search、網頁抓取、Custom API、SQL 資料庫 |
-| [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | 載入 Cog、用 `@discord_tool` 把指令包成 Agno 工具 |
+| [自訂指令與工具](https://zhiro-labs.github.io/dango/features/extensions/) | 在不受 git 追蹤的 `custom/` 資料夾用 Python 自己寫 slash command 與 Agent 工具 |
+| [嵌入其他 Bot](https://zhiro-labs.github.io/dango/advanced/embedding/) | 把 Cog 載入現有的 discord.py Bot |
 | [Workflow 架構](https://zhiro-labs.github.io/dango/features/workflow/) | 四步驟 Agno pipeline 的內部運作方式 |
 | [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) | 用 SSH 通道安全地在伺服器上運行 |
 
