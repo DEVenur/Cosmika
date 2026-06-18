@@ -33,6 +33,12 @@ logs/
 workspace/*
 !workspace/.gitkeep
 
+# Custom developer extensions (user-managed; templates tracked, real files ignored)
+custom/*
+!custom/README.md
+!custom/commands.py.example
+!custom/tools.py.example
+
 # Web GUI data directory (contains secrets, never commit)
 data/
 

@@ -113,6 +113,12 @@ async def setup_hook():
     await bot.add_cog(ChatCog(bot, discord_workflow, chat_system_prompt, runtime_config))
     await bot.add_cog(AdminCog(bot, runtime_config))
 
+    # User-defined slash commands from custom/*.py (gitignored). Loading is
+    # idempotent with the agent-tool loader; absent custom/ dir → no-op.
+    from dango.extensions import load_custom_modules, register_custom_commands
+    load_custom_modules()
+    register_custom_commands(bot)
+
 
 @bot.event
 async def on_ready():

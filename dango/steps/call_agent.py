@@ -504,6 +504,12 @@ def _make_agent(model: _DangoGemini | object | str) -> Agent:
                 db_cfg.get("description", ""),
             ))
 
+    # User-defined tools from custom/*.py (gitignored). Opt-in per function via
+    # the @agent_tool / @command_and_tool decorators; absent dir → no-op.
+    from ..extensions.loader import get_custom_tools, load_custom_modules
+    load_custom_modules()
+    tools.extend(get_custom_tools())
+
     return Agent(
         model=model,
         tools=tools or None,
@@ -749,19 +755,26 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
     }
 
     fallback_name: str | None = None
-    response = await _arun_agent(agent, messages_to_send, session_state)
+    # Expose per-request context to custom agent tools (custom/*.py) for the
+    # duration of the agent run, so a tool's Ctx.from_agent() sees who/where.
+    from ..extensions.context import reset_request_context, set_request_context
+    _ctx_token = set_request_context(session_state)
+    try:
+        response = await _arun_agent(agent, messages_to_send, session_state)
 
-    # Bidirectional fallback on error: fast→deep or deep→fast.
-    if FALLBACK_ON_ERROR and response.status == RunStatus.error:
-        fallback_agent: Agent | None = None
-        if agent is _fast and _deep is not None:
-            fallback_agent, fallback_name = _deep, DEEP_MODEL
-        elif agent is _deep:
-            fallback_agent, fallback_name = _fast, FAST_MODEL
+        # Bidirectional fallback on error: fast→deep or deep→fast.
+        if FALLBACK_ON_ERROR and response.status == RunStatus.error:
+            fallback_agent: Agent | None = None
+            if agent is _fast and _deep is not None:
+                fallback_agent, fallback_name = _deep, DEEP_MODEL
+            elif agent is _deep:
+                fallback_agent, fallback_name = _fast, FAST_MODEL
 
-        if fallback_agent is not None:
-            print(f"⚡ [call_discord_agent] {model_name} failed, falling back to {fallback_name}")
-            response = await _arun_agent(fallback_agent, messages_to_send, session_state)
+            if fallback_agent is not None:
+                print(f"⚡ [call_discord_agent] {model_name} failed, falling back to {fallback_name}")
+                response = await _arun_agent(fallback_agent, messages_to_send, session_state)
+    finally:
+        reset_request_context(_ctx_token)
 
     if response.status == RunStatus.error:
         tried = f"{model_name} and {fallback_name}" if fallback_name else model_name
