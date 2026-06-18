@@ -2,10 +2,6 @@
 Tests for step modules.
 """
 
-from unittest.mock import AsyncMock, MagicMock
-
-import pytest
-
 
 class TestFetchAndProcessHistory:
     """Tests for fetch_and_process_history step."""

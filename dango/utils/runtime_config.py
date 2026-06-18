@@ -227,22 +227,6 @@ class RuntimeConfig:
         with self._lock:
             self._load()
 
-    def update_channel_metadata(
-        self, channel_id: int, server_name: str, channel_name: str
-    ) -> None:
-        with self._lock:
-            metadata = self._cache.get("channel_metadata", {})
-            metadata[str(channel_id)] = {"server": server_name, "channel": channel_name}
-            self._cache["channel_metadata"] = metadata
-            self._save()
-
-    def update_user_metadata(self, user_id: int, username: str) -> None:
-        with self._lock:
-            metadata = self._cache.get("user_metadata", {})
-            metadata[str(user_id)] = {"username": username}
-            self._cache["user_metadata"] = metadata
-            self._save()
-
     def batch_update_metadata(
         self, channels: dict = None, users: dict = None
     ) -> None:

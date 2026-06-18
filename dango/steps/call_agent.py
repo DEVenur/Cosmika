@@ -23,7 +23,6 @@ from ..utils.build_instructions import build_instructions
 from ..utils.complexity_router import URL as _URL_RE, classify
 from ..utils.config_utils import env_bool, env_onoff_to_bool
 from ..utils.discord_helpers import format_sysinfo, resolve_mentions
-from ..utils.runtime_config import runtime_config
 
 
 # ── Provider → API key env var mapping ────────────────────────────────────────
