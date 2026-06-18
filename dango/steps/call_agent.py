@@ -743,6 +743,7 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
 
     session_state = {
         "author_name":  message_data["author_name"],
+        "author_id":    message_data.get("author_id"),
         "unique_users": list(unique_users),
         "chat_sys_prompt": message_data["_chat_sys_prompt"],
         "history_limit": message_data.get("_history_limit"),
@@ -751,6 +752,9 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
         "channel_name": message_data.get("channel_name", ""),
         "guild_id":     message_data.get("guild_id"),
         "guild_name":   message_data.get("guild_name", ""),
+        "author_permissions": message_data.get("author_permissions", []),
+        "mentioned_users":    message_data.get("mentioned_users", []),
+        "mentioned_roles":    message_data.get("mentioned_roles", []),
     }
 
     fallback_name: str | None = None

@@ -36,10 +36,15 @@ def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str,
     guild_id = None
     guild_name = ""
     author_roles: list[str] = []
+    author_permissions: list[str] = []
     if message.guild:
         guild_id = int(message.guild.id)
         guild_name = str(message.guild.name)
         author_roles = [r.name for r in message.author.roles if r.name != "@everyone"]
+        # guild_permissions is a Permissions object; iterating yields (name, value).
+        author_permissions = [
+            name for name, value in message.author.guild_permissions if value
+        ]
 
     return {
         "content": str(message.clean_content) if message.clean_content else "",
@@ -47,6 +52,15 @@ def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str,
         "author_id": author_id,
         "author_name": str(message.author.display_name),
         "author_roles": author_roles,
+        "author_permissions": author_permissions,
+        # Precise IDs for members/roles the message tagged, so tools don't have
+        # to fuzzy-match names. role_mentions is empty outside guilds.
+        "mentioned_users": [
+            {"id": int(m.id), "name": str(m.display_name)} for m in message.mentions
+        ],
+        "mentioned_roles": [
+            {"id": int(r.id), "name": str(r.name)} for r in message.role_mentions
+        ],
         "channel_id": channel_id,
         "channel_name": channel_name,
         "message_id": message_id,

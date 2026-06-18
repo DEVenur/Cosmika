@@ -12,7 +12,7 @@ the mechanism is independent of Agno internals.
 """
 
 from contextvars import ContextVar, Token
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 # Per-request session_state, set by the agent runner around agent.arun().
@@ -42,6 +42,13 @@ class Ctx:
     channel_name: str = ""
     guild_id: Optional[int] = None
     guild_name: str = ""
+    # Precise IDs of members/roles the triggering message tagged. Empty on the
+    # command path (slash commands carry no message mentions).
+    mentioned_user_ids: list[int] = field(default_factory=list)
+    mentioned_role_ids: list[int] = field(default_factory=list)
+    # Discord permission names the author holds in the guild (e.g.
+    # "manage_guild"), so tools can gate privileged actions. Empty in DMs.
+    author_permissions: list[str] = field(default_factory=list)
     # discord.Interaction when source == "discord_command", else None.
     interaction: Any = None
     # discord.ext.commands.Bot when available (command path), else None.
@@ -54,10 +61,14 @@ class Ctx:
         return cls(
             source="agent",
             author_name=ss.get("author_name", "User"),
+            author_id=ss.get("author_id"),
             channel_id=ss.get("channel_id"),
             channel_name=ss.get("channel_name", "") or "",
             guild_id=ss.get("guild_id"),
             guild_name=ss.get("guild_name", "") or "",
+            mentioned_user_ids=[u["id"] for u in ss.get("mentioned_users", [])],
+            mentioned_role_ids=[r["id"] for r in ss.get("mentioned_roles", [])],
+            author_permissions=list(ss.get("author_permissions", [])),
         )
 
     @classmethod
@@ -66,6 +77,10 @@ class Ctx:
         channel = getattr(interaction, "channel", None)
         guild = getattr(interaction, "guild", None)
         user = getattr(interaction, "user", None)
+        # user is a Member inside a guild (carries guild_permissions), a plain
+        # User in DMs (no permissions).
+        perms = getattr(user, "guild_permissions", None)
+        author_permissions = [name for name, value in perms if value] if perms else []
         return cls(
             source="discord_command",
             author_name=getattr(user, "display_name", None) or "User",
@@ -74,6 +89,7 @@ class Ctx:
             channel_name=getattr(channel, "name", "") or "",
             guild_id=getattr(guild, "id", None),
             guild_name=getattr(guild, "name", "") or "",
+            author_permissions=author_permissions,
             interaction=interaction,
             bot=bot or getattr(interaction, "client", None),
         )
