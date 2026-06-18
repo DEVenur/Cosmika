@@ -1,0 +1,12 @@
+/* The "Edit this page" link is emitted (via edit_uri + content.action.edit) only
+   so the copy-to-llm plugin can read it and build a correct raw-markdown URL for
+   its "Copy markdown link" / "Open in ChatGPT/Claude" actions. Without that link
+   the plugin falls back to a path builder that is wrong for this site's layout
+   (it keeps the /dango/ deploy prefix, drops the docs/ source dir, and appends
+   /index for use_directory_urls pages), producing a 404 link.
+
+   We keep the link in the DOM but hide the button, so the URLs work without
+   adding a visible edit affordance. display:none elements stay queryable. */
+.md-content__button[rel="edit"] {
+  display: none;
+}

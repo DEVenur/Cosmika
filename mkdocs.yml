@@ -3,6 +3,7 @@ site_description: "Open-source Discord AI bot — connect Gemini, GPT-4o, Claude
 site_url: https://zhiro-labs.github.io/dango
 repo_url: https://github.com/zhiro-labs/dango
 repo_name: zhiro-labs/dango
+edit_uri: edit/main/docs/
 site_author: zhiro-labs
 copyright: "© 2025 zhiro-labs · <a href='https://github.com/zhiro-labs/dango/blob/main/LICENSE'>MIT License</a>"
 
@@ -31,6 +32,7 @@ theme:
     - search.suggest
     - content.code.copy
     - content.code.annotate
+    - content.action.edit
 
 plugins:
   - search
@@ -50,6 +52,9 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+
+extra_css:
+  - stylesheets/extra.css
 
 extra:
   social:
