@@ -95,11 +95,14 @@ That single function gives you:
 |---|---|---|
 | `ctx.source` | `str` | `"discord_command"` or `"agent"` |
 | `ctx.author_name` | `str` | Display name of the user |
-| `ctx.author_id` | `int \| None` | Set on the command path |
+| `ctx.author_id` | `int \| None` | The caller's Discord user ID |
 | `ctx.channel_id` | `int \| None` | |
 | `ctx.channel_name` | `str` | |
 | `ctx.guild_id` | `int \| None` | |
 | `ctx.guild_name` | `str` | |
+| `ctx.mentioned_user_ids` | `list[int]` | IDs of members the message tagged. Agent path only — empty for slash commands |
+| `ctx.mentioned_role_ids` | `list[int]` | IDs of roles the message tagged. Agent path only — empty for slash commands |
+| `ctx.author_permissions` | `list[str]` | Permission names the caller holds in the guild (e.g. `"manage_guild"`). Empty in DMs |
 | `ctx.interaction` | `discord.Interaction \| None` | Only on the command path |
 | `ctx.bot` | `commands.Bot \| None` | Only on the command path |
 
@@ -113,6 +116,47 @@ def whoami(ctx: Ctx) -> str:
         return f"You ran /whoami in #{ctx.channel_name}."
     return f"{ctx.author_name} is asking via chat."
 ```
+
+### Mentions and permissions
+
+When a user @-mentions members or roles in a chat message, the framework hands
+your tool the **exact IDs** — no need to fuzzy-match display names against the
+guild's member or role list. Because Discord mention syntax is built straight
+from the ID (`<@user_id>`, `<@&role_id>`), a tool can echo a real, clickable
+ping back into the channel using only what's on `ctx`:
+
+```python
+@agent_tool(name="page_role")
+def page_role(ctx: Ctx) -> str:
+    # "page @Moderator about this"  →  precise role IDs, already resolved.
+    if not ctx.mentioned_role_ids:
+        return "Tag a role to page."
+    mentions = " ".join(f"<@&{rid}>" for rid in ctx.mentioned_role_ids)
+    return f"Paging {mentions} 🍡"
+```
+
+`ctx.author_permissions` lets a tool gate privileged actions on the caller's
+own Discord permissions before doing anything:
+
+```python
+    if "manage_guild" not in ctx.author_permissions:
+        return "You need Manage Server to do that."
+```
+
+!!! note "Mention/permission fields and the agent path"
+    `mentioned_user_ids` and `mentioned_role_ids` come from the triggering chat
+    message, so they populate on the **agent path** and are empty for slash
+    commands (which carry no message mentions). `author_permissions` is
+    populated on **both** paths but is empty in DMs, where there is no guild to
+    grant permissions.
+
+!!! warning "Acting on the IDs needs a Discord client"
+    The IDs identify who was tagged, but mutating Discord state (adding roles,
+    fetching members) needs a `discord.py` client. `ctx.bot` is set **only on
+    the command path** — on the agent path it is `None`. So agent-path tools can
+    *reference* mentioned users/roles (build mention strings, gate on
+    permissions, return them for the model to reason about) but cannot perform
+    member/role mutations directly.
 
 ## Interactive UI (modals, buttons, selects) — not supported here
 

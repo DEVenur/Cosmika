@@ -104,6 +104,9 @@ argument when the function declares `ctx`.
 | `channel_name` | `str` |
 | `guild_id` | `int \| None` |
 | `guild_name` | `str` |
+| `mentioned_user_ids` | `list[int]` (agent path only) |
+| `mentioned_role_ids` | `list[int]` (agent path only) |
+| `author_permissions` | `list[str]` (empty in DMs) |
 | `interaction` | `discord.Interaction \| None` (command path only) |
 | `bot` | `commands.Bot \| None` (command path only) |
 
