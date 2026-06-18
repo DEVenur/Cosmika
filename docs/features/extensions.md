@@ -114,6 +114,43 @@ def whoami(ctx: Ctx) -> str:
     return f"{ctx.author_name} is asking via chat."
 ```
 
+## Interactive UI (modals, buttons, selects) — not supported here
+
+This SDK is built around a simple contract: **your function takes arguments and
+returns a string, and the framework sends it.** Under the hood the command path
+calls `interaction.response.defer()` and then `followup.send(...)` for you. That
+contract has two consequences:
+
+- **No Discord UI components.** You cannot pop up a modal or attach buttons /
+  select menus from an extension function — a modal must be the *first* response
+  to an interaction, but the framework has already deferred it. This applies to
+  `@command` too, not just the agent path.
+- **The agent path has no interaction.** When the LLM calls your function,
+  `ctx.interaction` is `None` and there is no human in the loop to fill a form.
+
+**How the agent "fills in" missing input:** it asks. If a tool needs more
+information the model simply asks a follow-up question in chat ("Which ticker?"),
+the user replies, and the agent calls the tool again with the answer. Collection
+is conversational, not a popup.
+
+**If you genuinely need a modal / button flow,** write a normal `discord.py`
+command or Cog directly (outside this SDK) so you own the interaction lifecycle.
+To also let the agent do the same job, add a separate `@agent_tool` whose
+parameters are the fields the modal would collect, and have both call one shared
+logic function:
+
+```python
+async def _create_event(title: str, when: str) -> str:
+    ...  # shared core logic
+
+@agent_tool(description="Create a calendar event")
+async def create_event(title: str, when: str) -> str:
+    """Args: title: event title. when: ISO datetime."""
+    return await _create_event(title, when)
+
+# The modal-based version lives in your own discord.py Cog and also calls _create_event().
+```
+
 ## How loading works
 
 - On startup the bot imports every `custom/*.py` once (`*.example` files are

@@ -88,22 +88,23 @@ Then paste the output as the value in `.env`. See [Tools — Custom API Tools](f
 
 ---
 
-## Testing tool logic without starting the full bot
+## Testing custom commands and tools without starting the bot
 
-You can call `@discord_tool` functions directly in a test script — they are regular Python async functions. The `run_context` argument is only needed when the function actually calls helpers like `get_discord_context()`. For pure logic tests, pass `None`:
+Functions you write in `custom/*.py` ([Custom Commands & Tools](features/extensions.md)) are plain Python functions — call them directly in a test script. If a function declares `ctx`, construct a `Ctx`; its `source` field (`"agent"` or `"discord_command"`) is what your code branches on:
 
 ```python
 import asyncio
-from neko_tools import delete_event
+from dango.extensions import Ctx
+from custom.commands import stock   # your own custom file
 
 async def test():
-    result = await delete_event.__wrapped__("study group", run_context=None)
-    print(result)
+    ctx = Ctx(source="agent", author_name="tester")
+    print(await stock(ctx, ticker="AAPL"))
 
 asyncio.run(test())
 ```
 
-For functions that use Discord context, mock `run_context` by constructing a minimal object or by calling `get_discord_context` with a fake `session_state`. Unit-testing the tool logic in isolation means you do not need a running Discord bot for most development iterations.
+Functions without a `ctx` parameter are simpler still — call them with their arguments directly. Testing the logic in isolation means you do not need a running Discord bot for most development iterations.
 
 ---
 

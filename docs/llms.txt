@@ -18,7 +18,7 @@
 - [Model Providers & Routing](https://raw.githubusercontent.com/zhiro-labs/dango/main/docs/features/models.md): `provider:model_id` format, supported providers, dual-model AUTO_ROUTE, error fallback, local models, context token budget.
 - [Tools](https://raw.githubusercontent.com/zhiro-labs/dango/main/docs/features/tools.md): DuckDuckGo search, website fetching, workspace file access, custom HTTP APIs, SQL databases.
 - [Custom Commands & Tools](https://raw.githubusercontent.com/zhiro-labs/dango/main/docs/features/extensions.md): Write your own Discord slash commands and agent tools in Python in a gitignored custom/ directory. Three decorators — @command, @agent_tool, @command_and_tool — with per-function opt-in for agent access. One function can be both a slash command and an LLM-callable tool; a normalized Ctx works across both call paths.
-- [Workflow Architecture](https://raw.githubusercontent.com/zhiro-labs/dango/main/docs/features/workflow.md): Four-step Agno Workflow — FetchHistory → LLMChat → ExtractRenderTables → SendResponse. Entry points: `on_message` (chat) and `on_interaction` (button clicks, modal submits, context menus — routed via `dango_component:` / `dango_modal:` custom_id prefixes).
+- [Workflow Architecture](https://raw.githubusercontent.com/zhiro-labs/dango/main/docs/features/workflow.md): Four-step Agno Workflow — FetchHistory → LLMChat → ExtractRenderTables → SendResponse. Entry point: `on_message` in ChatCog (and the `/deep` command), which builds message_data and calls workflow.arun().
 
 ## Usage
 

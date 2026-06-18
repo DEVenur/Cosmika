@@ -199,13 +199,11 @@ dango/                         # repo root
 │   │   ├── fetch_history.py
 │   │   ├── call_agent.py      # Multi-provider LLM call
 │   │   ├── table_steps.py     # Table → PNG rendering
-│   │   └── send_response.py   # Discord send (channel + interaction followup)
+│   │   └── send_response.py   # Discord send (split, reply, table images)
 │   ├── commands/
-│   │   ├── chat_commands.py   # ChatCog: on_message, on_interaction, /newchat, /deep
+│   │   ├── chat_commands.py   # ChatCog: on_message, /newchat, /deep
 │   │   └── admin_commands.py  # AdminCog: all admin slash commands
-│   ├── tools/
-│   │   ├── __init__.py        # Public API: discord_tool, check_roles, set_ephemeral, …
-│   │   └── discord_tool.py    # Tool helpers and ContextMenuDef
+│   ├── extensions/            # Custom commands & tools SDK (loads custom/*.py)
 │   └── utils/
 ├── web/                       # FastAPI dashboard
 ├── config/                    # System prompt & runtime config

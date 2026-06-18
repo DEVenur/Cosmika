@@ -61,11 +61,10 @@ If no tables are found, this step passes through transparently.
 Sends the final response back to Discord:
 
 - Splits messages longer than Discord's 2000-character limit across multiple messages
-- Attaches rendered table PNG files and any `discord.Embed` objects set by tools via `set_discord_response()`
-- Respects the `suppress_text` flag — when a tool has already sent content directly (e.g. a native `discord.ui.View`), the LLM text is silently dropped
-- For interaction-triggered runs (button, modal, context menu), uses `interaction.followup.send()` instead of `channel.send()`; respects the `ephemeral` flag set by `set_ephemeral()`
-- Prepends any `[dango-sysinfo]` notes (e.g. fallback notifications)
-- Handles error messages from earlier steps
+- Attaches rendered table PNG files (and cleans up the temp files afterward)
+- Replies to the original message when it can still be fetched, otherwise falls back to `channel.send()`
+- Appends any `[dango-sysinfo]` notes (e.g. fallback notifications)
+- Handles error messages forwarded from earlier steps
 
 ## Entry points
 
@@ -73,18 +72,9 @@ The workflow is invoked from two discord.py Cogs:
 
 | Cog | File | Triggers |
 |---|---|---|
-| `ChatCog` | `dango/commands/chat_commands.py` | `on_message`, `on_interaction`, `/newchat`, `/deep` |
+| `ChatCog` | `dango/commands/chat_commands.py` | `on_message`, `/newchat`, `/deep` |
 | `AdminCog` | `dango/commands/admin_commands.py` | All admin slash commands |
 
-`ChatCog` has two entry paths into the workflow:
+The workflow is driven by `ChatCog.on_message`: it fires for every Discord message, checks whether the bot should respond (mention, allowed channel, or allowed DM user), builds the `message_data` structure, and calls `workflow.arun()`. The `/deep` command runs the same pipeline with the deep model forced on.
 
-**`on_message`** — the standard path. Fires for every Discord message; the Cog checks whether the bot should respond (mention, allowed channel, or allowed DM user), then calls `workflow.arun()`.
-
-**`on_interaction`** — fires for Discord Interactions not handled by app_commands. Dango routes two kinds through the workflow:
-
-- **Modal submits** whose `custom_id` starts with `dango_modal:` — the modal fields are assembled into a natural-language string the agent reads as a user message
-- **Component interactions** (button clicks, select menus) whose `custom_id` starts with `dango_component:` — the component's value and the original message context are passed to the agent
-
-Context menu commands registered via `ContextMenuDef` are handled similarly: the right-clicked content is formatted and sent through the workflow.
-
-All entry points build the same `message_data` structure and call the same `workflow.arun()`, so tools see a consistent `session_state` regardless of how the request arrived.
+Custom slash commands and agent tools added via `dango.extensions` plug in separately — see [Custom Commands & Tools](extensions.md).
