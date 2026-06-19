@@ -13,6 +13,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: "pages"
@@ -23,6 +24,9 @@ env:
 
 jobs:
   build:
+    # Runs only on the upstream repo. Forks: change the owner below to your own
+    # account/org to publish docs to your repo's GitHub Pages.
+    if: github.repository_owner == 'zhiro-labs'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +40,12 @@ jobs:
 
       - name: Build docs
         run: mkdocs build
+
+      # enablement: true turns Pages on automatically, so forks that enable this
+      # workflow don't need to flip the Pages setting by hand first.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

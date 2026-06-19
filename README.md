@@ -358,6 +358,17 @@ Full docs at **[zhiro-labs.github.io/dango](https://zhiro-labs.github.io/dango)*
 | [Workflow Architecture](https://zhiro-labs.github.io/dango/features/workflow/) | How the 4-step Agno pipeline works under the hood |
 | [VPS Deployment](https://zhiro-labs.github.io/dango/advanced/vps/) | Run on a server safely with SSH tunneling |
 
+## Forking & CI
+
+The two GitHub Actions workflows (`Build and Push Docker Image`, `Deploy Docs`) are gated to the upstream repo, so they **skip on forks** by default — no failed runs and no wasted Actions minutes. To enable them on your own fork, edit the `if:` line in each workflow under `.github/workflows/` and replace the owner with your account/org:
+
+```yaml
+# .github/workflows/docker.yml and docs.yml
+if: github.repository_owner == 'your-account'
+```
+
+Once enabled, the Docker image name is derived from your repo automatically (`ghcr.io/your-account/dango`), and the docs workflow turns on GitHub Pages for you — no other edits needed.
+
 ---
 
 Built with [Agno](https://docs.agno.com) · [discord.py](https://discordpy.readthedocs.io)

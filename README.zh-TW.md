@@ -358,6 +358,17 @@ uv add git+https://github.com/zhiro-labs/dango
 | [Workflow 架構](https://zhiro-labs.github.io/dango/features/workflow/) | 四步驟 Agno pipeline 的內部運作方式 |
 | [VPS 部署](https://zhiro-labs.github.io/dango/advanced/vps/) | 用 SSH 通道安全地在伺服器上運行 |
 
+## Fork 與 CI
+
+兩個 GitHub Actions workflow(`Build and Push Docker Image`、`Deploy Docs`)只在上游 repo 執行,在 fork 上**預設會 skip**——不會有失敗的紅叉,也不會浪費 Actions 額度。若要在自己的 fork 啟用,編輯 `.github/workflows/` 底下兩個檔案的 `if:` 那行,把 owner 換成你的帳號/組織:
+
+```yaml
+# .github/workflows/docker.yml 與 docs.yml
+if: github.repository_owner == 'your-account'
+```
+
+啟用後,Docker image 名稱會自動依你的 repo 產生(`ghcr.io/your-account/dango`),docs workflow 也會自動幫你開啟 GitHub Pages——不需要再改其他地方。
+
 ---
 
 Built with [Agno](https://docs.agno.com) · [discord.py](https://discordpy.readthedocs.io)

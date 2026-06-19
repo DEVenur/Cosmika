@@ -16,6 +16,9 @@ permissions:
 
 jobs:
   build:
+    # Runs only on the upstream repo. Forks: change the owner below to your own
+    # account/org to enable publishing to ghcr.io/<your-namespace>/dango.
+    if: github.repository_owner == 'zhiro-labs'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,13 +33,22 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # Derives the image name from the current repo, so forks publish to
+          # their own namespace automatically once the job is enabled.
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/zhiro-labs/dango:latest
+          tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
