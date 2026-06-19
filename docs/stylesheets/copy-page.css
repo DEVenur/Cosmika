@@ -1,0 +1,135 @@
+/* Self-hosted "Copy page for LLM" control — WorkOS-style split button.
+   Colours come from Material's CSS variables, so light/dark follow the theme. */
+
+.llm-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.llm-title-row > h1 {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.llm-copy {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.llm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  height: 1.9rem;
+  padding: 0 0.7em;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color--light);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.llm-btn svg {
+  flex: 0 0 auto;
+}
+
+.llm-btn:hover {
+  background: var(--md-default-fg-color--lightest);
+  color: var(--md-default-fg-color);
+}
+
+.llm-btn-main {
+  border-radius: 0.4rem 0 0 0.4rem;
+}
+
+.llm-btn-caret {
+  border-radius: 0 0.4rem 0.4rem 0;
+  border-left: 0;
+  padding: 0 0.35em;
+}
+
+.llm-btn-caret[aria-expanded="true"] {
+  background: var(--md-default-fg-color--lightest);
+  color: var(--md-default-fg-color);
+}
+
+/* Dropdown menu ---------------------------------------------------------- */
+.llm-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 10;
+  min-width: 15rem;
+  padding: 0.3rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+  background: var(--md-default-bg-color);
+  box-shadow: var(--md-shadow-z2, 0 4px 16px rgba(0, 0, 0, 0.2));
+}
+
+.llm-menu[hidden] {
+  display: none;
+}
+
+.llm-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--md-default-fg-color);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.llm-menu-item:hover,
+.llm-menu-item:focus-visible {
+  background: var(--md-default-fg-color--lightest);
+  outline: none;
+}
+
+.llm-menu-label {
+  flex: 1 1 auto;
+}
+
+.llm-menu-item .llm-ext {
+  color: var(--md-default-fg-color--light);
+  opacity: 0.7;
+}
+
+/* Toast ------------------------------------------------------------------ */
+.llm-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translate(-50%, 1rem);
+  z-index: 1000;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.4rem;
+  background: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  font-size: 0.72rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.llm-toast--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}

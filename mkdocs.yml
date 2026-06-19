@@ -37,8 +37,12 @@ theme:
 plugins:
   - search
   - tags
-  - copy-to-llm:
-      repo_url: "https://raw.githubusercontent.com/zhiro-labs/dango/main"
+
+# Self-hosted "Copy for LLM" support (replaces mkdocs-copy-to-llm):
+# emits same-origin .md twins, injects the llm:md-url meta tag, and
+# generates llms.txt / llms-full.txt at build time.
+hooks:
+  - docs/hooks/llm_md.py
 
 markdown_extensions:
   - admonition
@@ -55,8 +59,13 @@ markdown_extensions:
 
 extra_css:
   - stylesheets/extra.css
+  - stylesheets/copy-page.css
+
+extra_javascript:
+  - javascripts/copy-page.js
 
 extra:
+  llms_summary: "Discord AI Agent built on Agno. Connects to any AI model provider — Google Gemini/Gemma, OpenAI, Anthropic, Groq, Ollama, and more. Features dual-model routing, multilingual complexity scoring, table-to-image rendering, and a browser-based setup dashboard. Drop it into a Discord channel and configure everything via slash commands — no restarts needed."
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/zhiro-labs/dango
