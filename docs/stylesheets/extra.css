@@ -10,3 +10,17 @@
 .md-content__button[rel="edit"] {
   display: none;
 }
+
+/* copy-to-llm dropdown: the menu is position:absolute; right:0 anchored to a
+   narrow inline-flex container, with only min-width:160px and white-space:nowrap.
+   The longest item ("Copy markdown link") is wider than 160px, so the text
+   spilled out of the box. Size the menu to its content (capped for small
+   viewports) and let items wrap if they ever hit the cap. */
+.copy-to-llm-dropdown {
+  width: max-content;
+  max-width: min(280px, 90vw);
+}
+
+.copy-to-llm-dropdown-item {
+  white-space: normal;
+}
