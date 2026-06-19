@@ -1,3 +1,7 @@
+---
+summary: "Fixes for common issues — bot not responding, `/addchannel` having no effect, `on`/`off` vs `true`/`false` env-var formats, Gemini Search vs DuckDuckGo, error-fallback messages, `CUSTOM_APIS_JSON` parsing, testing custom tools, and workspace context."
+---
+
 # Troubleshooting
 
 ## Bot doesn't respond at all

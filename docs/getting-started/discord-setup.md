@@ -1,3 +1,7 @@
+---
+summary: "Create a Discord bot, enable required intents, and generate an invite link."
+---
+
 # Discord Setup
 
 Before running Dango, you need a Discord bot application with the right permissions. This takes about five minutes.

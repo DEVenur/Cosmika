@@ -1,3 +1,7 @@
+---
+summary: "`runtime.yml` and all Discord slash commands for live configuration."
+---
+
 # Runtime Config
 
 Runtime settings are stored in `config/runtime.yml` and managed through Discord slash commands. Changes take effect immediately — no restarts needed.

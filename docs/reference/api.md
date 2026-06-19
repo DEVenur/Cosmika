@@ -1,3 +1,7 @@
+---
+summary: "Embedding SDK reference — symbols re-exported from the `dango` package (ChatCog, AdminCog, create_discord_workflow, RuntimeConfig) and the `dango.extensions` custom-tool API (@command, @agent_tool, @command_and_tool, register_tools, Ctx)."
+---
+
 # API Reference
 
 The core embedding symbols are re-exported from the `dango` top-level package.

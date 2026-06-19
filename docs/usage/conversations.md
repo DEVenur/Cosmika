@@ -1,3 +1,7 @@
+---
+summary: "How to start conversations, use images, reply context, `/newchat`, auto-routing, and other automatic behaviours."
+---
+
 # Conversations
 
 ## Starting a conversation
