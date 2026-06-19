@@ -1,4 +1,5 @@
 ---
+summary: "Load Dango's ChatCog and AdminCog into an existing discord.py bot to add natural-language chat, web search, read-URL, and workspace access on top of the host bot's own commands — all opt-in via env vars, no code changes beyond loading the Cogs. Includes a full Neko reminder bot integration example. To add your own commands/agent tools, see Custom Commands & Tools."
 description: "Embed Dango's AI agent into an existing discord.py bot. Install the package, load ChatCog and AdminCog in setup_hook, and add natural-language chat on top of your bot's own commands — without touching them."
 tags:
   - Advanced

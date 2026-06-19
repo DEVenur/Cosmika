@@ -1,4 +1,5 @@
 ---
+summary: "Secure the dashboard with SSH tunneling; configure Docker auto-restart."
 description: "Deploy Dango Discord AI bot to a VPS with Docker. Includes SSH tunneling to secure the web dashboard, systemd service setup, and firewall configuration."
 tags:
   - Advanced

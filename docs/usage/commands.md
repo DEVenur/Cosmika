@@ -1,4 +1,5 @@
 ---
+summary: "Full reference for `/newchat`, `/deep`, `/addchannel`, `/sethistorylimit`, `/settimezone`, and all admin commands."
 description: "Full reference for Dango Discord slash commands — reset chat history, force deep model, manage allowed channels and users, set history limit, timezone, and activity status."
 tags:
   - Usage

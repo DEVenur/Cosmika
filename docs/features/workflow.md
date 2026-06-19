@@ -1,4 +1,5 @@
 ---
+summary: "Four-step Agno Workflow — FetchHistory → LLMChat → ExtractRenderTables → SendResponse. Entry point: `on_message` in ChatCog (and the `/deep` command), which builds message_data and calls workflow.arun()."
 description: "How Dango processes Discord messages: a four-step Agno Workflow that fetches history, calls the AI agent, renders tables as images, and sends the response back."
 tags:
   - Architecture

@@ -1,4 +1,5 @@
 ---
+summary: "Write your own Discord slash commands and agent tools in Python in a gitignored custom/ directory. Three decorators — @command, @agent_tool, @command_and_tool — with per-function opt-in for agent access. One function can be both a slash command and an LLM-callable tool; a normalized Ctx works across both call paths. register_tools() attaches any Agno toolkit or context provider (Drive, Gmail, Calendar, Slack, etc.) to the agent without editing core code."
 description: "Write your own Discord slash commands and agent tools in Python, drop them into a gitignored custom/ directory, and let the agent call them — one function can be both a slash command and an LLM-callable tool."
 tags:
   - Tools

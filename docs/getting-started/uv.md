@@ -1,4 +1,5 @@
 ---
+summary: "Developer path — clone, sync, fill `.env`, run."
 description: "Install and run Dango Discord AI bot with uv — the recommended path for developers. Clone the repo, install dependencies, configure .env, and start the bot directly."
 tags:
   - Getting Started

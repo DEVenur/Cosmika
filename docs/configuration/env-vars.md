@@ -1,4 +1,5 @@
 ---
+summary: "All env vars — model selection, routing, tools, Gemini-specific settings, per-model overrides."
 description: "Complete reference for all Dango environment variables — model provider settings, dual-model routing, tool toggles, Gemini thinking mode, history limits, and more."
 tags:
   - Configuration
