@@ -31,6 +31,9 @@ class ExtensionSpec:
 # Populated at import time, when the loader imports each custom/*.py file.
 _REGISTRY: list[ExtensionSpec] = []
 
+# Raw Agno tools/toolkits/context-provider tools registered via register_tools().
+_RAW_TOOLS: list = []
+
 
 def _first_doc_line(fn: Callable) -> str:
     doc = (fn.__doc__ or "").strip()
@@ -87,6 +90,30 @@ command_and_tool = _make_decorator(expose_command=True, expose_tool=True)
 """Register a function as BOTH a Discord slash command and an Agent tool."""
 
 
+def register_tools(*tools) -> None:
+    """Attach raw Agno tools/toolkits/context providers to the agent.
+
+    For anything that is not a single decorated function — an Agno ``Toolkit``
+    instance, or the list produced by a context provider's ``get_tools()`` — call
+    this from a ``custom/*.py`` file so it reaches the agent without editing core
+    code. Accepts plain functions, ``@tool`` functions, Toolkit instances, or
+    lists/tuples of any of these::
+
+        from dango.extensions import register_tools
+        from agno.context.gdrive import GoogleDriveContextProvider
+
+        register_tools(*GoogleDriveContextProvider().get_tools())
+
+    These are exposed to the agent only; they are never turned into Discord slash
+    commands.
+    """
+    for t in tools:
+        if isinstance(t, (list, tuple)):
+            _RAW_TOOLS.extend(t)
+        else:
+            _RAW_TOOLS.append(t)
+
+
 def command_specs() -> list[ExtensionSpec]:
     return [s for s in _REGISTRY if s.expose_command]
 
@@ -95,6 +122,11 @@ def tool_specs() -> list[ExtensionSpec]:
     return [s for s in _REGISTRY if s.expose_tool]
 
 
+def raw_tools() -> list:
+    return list(_RAW_TOOLS)
+
+
 def clear_registry() -> None:
     """Reset the registry. Used by tests and (later) hot-reload."""
     _REGISTRY.clear()
+    _RAW_TOOLS.clear()

@@ -90,6 +90,20 @@ When `name` is omitted the function name is used; when `description` is omitted
 the first line of the docstring is used. A leading `ctx` parameter is optional
 and is stripped from the public command/tool schema.
 
+### `register_tools(*tools)`
+
+Attach raw Agno tools to the agent — plain functions, `@tool` functions,
+`Toolkit` instances, or lists such as a context provider's `get_tools()`. Lists
+and tuples are flattened. Call it from a `custom/*.py` file; everything passed is
+exposed to the agent only (never a slash command).
+
+```python
+from dango.extensions import register_tools
+from agno.context.gdrive import GoogleDriveContextProvider
+
+register_tools(*GoogleDriveContextProvider().get_tools())
+```
+
 ### `Ctx`
 
 Dataclass describing where a function was invoked from, passed as the first

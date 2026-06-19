@@ -158,6 +158,37 @@ own Discord permissions before doing anything:
     permissions, return them for the model to reason about) but cannot perform
     member/role mutations directly.
 
+## Using built-in Agno toolkits & context providers
+
+Beyond writing your own functions, you can attach any
+[Agno toolkit](https://docs.agno.com/tools/toolkits) or
+[context provider](https://docs.agno.com/context-providers) to the agent from a
+custom file with `register_tools()` — no core code changes:
+
+```python
+from dango.extensions import register_tools
+from agno.context.gdrive import GoogleDriveContextProvider
+
+# A context provider exposes its tools via get_tools()
+register_tools(*GoogleDriveContextProvider(corpora="user").get_tools())
+```
+
+`register_tools()` accepts plain functions, `@tool` functions, `Toolkit`
+instances, or lists (such as a provider's `get_tools()`). Everything you pass is
+exposed to the **agent only** — it never becomes a Discord slash command. This is
+the same mechanism Dango uses internally for its SQL database tools.
+
+Agno ships context providers for Google Drive, Gmail, Calendar, Slack, web, wiki,
+the filesystem, and more. Some need extra packages and credentials — e.g. Drive
+needs `google-api-python-client google-auth-httplib2 google-auth-oauthlib` plus
+OAuth. Install those in your clone the usual way (`uv add ...`).
+
+!!! note "Agno's Scheduler does not apply"
+    Agno's [Scheduler](https://docs.agno.com/scheduler/overview) is a runtime/cron
+    orchestration layer that drives AgentOS endpoints — it is not a tool and does
+    not plug into Dango's discord.py + Workflow model. For scheduled behaviour,
+    use `discord.ext.tasks` or an external cron job.
+
 ## Interactive UI (modals, buttons, selects) — not supported here
 
 This SDK is built around a simple contract: **your function takes arguments and

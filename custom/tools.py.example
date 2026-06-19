@@ -49,3 +49,17 @@ def whoami(ctx: Ctx) -> str:
 #     import re
 #     m = re.search(r"<title>(.*?)</title>", html, re.I | re.S)
 #     return m.group(1).strip() if m else "(no title found)"
+
+
+# ── Attach a built-in Agno toolkit or context provider ───────────────────────
+# Use register_tools() for anything that isn't your own single function — an
+# Agno Toolkit instance, or a context provider's get_tools() list. These are
+# exposed to the agent only (never a slash command), with no core code changes.
+#
+# Some providers need extra packages / credentials, e.g. Drive:
+#   uv add google-api-python-client google-auth-httplib2 google-auth-oauthlib
+#
+# from dango.extensions import register_tools
+# from agno.context.gdrive import GoogleDriveContextProvider
+#
+# register_tools(*GoogleDriveContextProvider(corpora="user").get_tools())

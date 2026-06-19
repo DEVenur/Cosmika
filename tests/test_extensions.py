@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dango.extensions import agent_tool, command, command_and_tool
+from dango.extensions import agent_tool, command, command_and_tool, register_tools
 from dango.extensions.context import (
     Ctx,
     reset_request_context,
@@ -180,6 +180,36 @@ class TestAgnoIntegration:
 
     def test_no_tools_returns_empty_list(self):
         assert get_custom_tools() == []
+
+
+# ── register_tools (raw toolkits / context providers) ──────────────────────────
+class TestRegisterTools:
+    def test_single_object_passes_through(self):
+        sentinel = object()
+        register_tools(sentinel)
+        assert sentinel in get_custom_tools()
+
+    def test_list_is_flattened(self):
+        # Mirrors register_tools(*provider.get_tools()) and register_tools(provider.get_tools()).
+        a, b = object(), object()
+        register_tools([a, b])
+        tools = get_custom_tools()
+        assert a in tools and b in tools
+
+    def test_raw_tools_are_not_slash_commands(self):
+        register_tools(object())
+        assert command_specs() == []
+
+    def test_combined_with_decorated_tools(self):
+        @agent_tool(name="decorated")
+        def decorated(x: str):
+            return x
+
+        sentinel = object()
+        register_tools(sentinel)
+        tools = get_custom_tools()
+        assert sentinel in tools
+        assert "decorated" in [getattr(t, "name", None) for t in tools]
 
 
 # ── Integration with discord.py ────────────────────────────────────────────────

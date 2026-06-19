@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, get_type_hints
 
 from .context import Ctx
-from .registry import ExtensionSpec, command_specs, tool_specs
+from .registry import ExtensionSpec, command_specs, raw_tools, tool_specs
 
 _loaded = False
 
@@ -112,20 +112,26 @@ def _make_tool_wrapper(spec: ExtensionSpec) -> Callable:
 
 
 def get_custom_tools() -> list:
-    """Build Agno tool objects from the registered tool specs."""
-    specs = tool_specs()
-    if not specs:
-        return []
+    """Build the agent's custom tool list.
 
-    from agno.tools import tool
-
+    Combines decorated @agent_tool / @command_and_tool functions with any raw
+    tools/toolkits/context-provider tools registered via register_tools().
+    """
     tools = []
-    for spec in specs:
-        wrapper = _make_tool_wrapper(spec)
-        try:
-            tools.append(tool(name=spec.name, description=spec.description or None)(wrapper))
-        except Exception as e:
-            print(f"⚠️  [custom] could not register tool '{spec.name}': {e}")
+
+    specs = tool_specs()
+    if specs:
+        from agno.tools import tool
+
+        for spec in specs:
+            wrapper = _make_tool_wrapper(spec)
+            try:
+                tools.append(tool(name=spec.name, description=spec.description or None)(wrapper))
+            except Exception as e:
+                print(f"⚠️  [custom] could not register tool '{spec.name}': {e}")
+
+    # Raw Agno toolkits / context-provider tools registered via register_tools().
+    tools.extend(raw_tools())
     return tools
 
 
