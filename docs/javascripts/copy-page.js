@@ -25,6 +25,7 @@
     claude: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.304 3.541h-3.672l6.696 16.918H24Zm-10.608 0L0 20.459h3.744l1.37-3.553h7.005l1.369 3.553h3.744L10.536 3.541Zm-.371 10.223L8.616 7.82l2.291 5.945Z"/></svg>',
     cursor: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 6.5 12 1l9 5.5v11L12 23l-9-5.5v-11Zm9 .5L4.8 7.2 12 11.4l7.2-4.2L12 7Zm-7.5 1.6v7.1L11 19.7v-7.1L4.5 8.6Zm15 0L13 12.6v7.1l6.5-3.9V8.6Z"/></svg>',
     perplexity: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2.5 19 7v10l-7 4.5L5 17V7l7-4.5Zm0 2.3L7 8v8l5 3.2L17 16V8l-5-3.2ZM11.25 7.5h1.5v9h-1.5v-9Z"/></svg>',
+    grok: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4 20 15.2 8.8l-2.1-2.1L4 15.8V20h4.2l9.4-9.4 2.1 2.1L11.9 20H4Zm12.4-13.3L19.8 3.3v5.3l-3.4 3.4-2.1-2.1 2.1-3.2Z"/></svg>',
   };
 
   var PROVIDERS = [
@@ -54,6 +55,13 @@
       icon: ICONS.perplexity,
       url: function (p) {
         return "https://www.perplexity.ai/?q=" + encodeURIComponent(p);
+      },
+    },
+    {
+      label: "Open in Grok",
+      icon: ICONS.grok,
+      url: function (p) {
+        return "https://grok.com/?q=" + encodeURIComponent(p);
       },
     },
   ];
