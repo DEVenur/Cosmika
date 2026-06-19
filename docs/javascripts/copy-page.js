@@ -158,6 +158,11 @@
     menu.appendChild(copyLink);
     menu.appendChild(viewMd);
 
+    var separator = document.createElement("div");
+    separator.className = "llm-menu-sep";
+    separator.setAttribute("role", "separator");
+    menu.appendChild(separator);
+
     PROVIDERS.forEach(function (provider) {
       var item = menuItem(provider.icon, provider.label, true);
       item.addEventListener("click", function () {

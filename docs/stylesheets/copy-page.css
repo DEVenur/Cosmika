@@ -102,6 +102,12 @@
   outline: none;
 }
 
+.llm-menu-sep {
+  height: 1px;
+  margin: 0.3rem 0.45rem;
+  background: var(--md-default-fg-color--lightest);
+}
+
 .llm-menu-label {
   flex: 1 1 auto;
 }
