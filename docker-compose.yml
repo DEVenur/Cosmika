@@ -22,6 +22,7 @@ services:
       - ./config:/app/config       # chat_sys_prompt.txt, runtime.yml (auto-created on first run)
       - fonts:/app/assets/fonts    # font cache (~100 MB, persists across restarts)
       - ./workspace:/app/workspace  # workspace files (enable in Web GUI to activate)
+      - ./custom:/app/custom        # custom commands & tools (.example templates seeded on first run)
     restart: unless-stopped
 
 volumes:

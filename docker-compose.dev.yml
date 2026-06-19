@@ -22,6 +22,7 @@ services:
       - ./config:/app/config
       - fonts:/app/assets/fonts
       - ./workspace:/app/workspace
+      - ./custom:/app/custom
     restart: unless-stopped
 
 volumes:

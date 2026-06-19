@@ -8,6 +8,11 @@ set -e
 [ -f /app/config/chat_sys_prompt.txt ] || \
     cp /app/config.examples/chat_sys_prompt.txt.example /app/config/chat_sys_prompt.txt
 
+# Seed custom-extension templates into the mounted ./custom on first run (empty volume).
+# Only .example templates are copied — never an active commands.py/tools.py.
+[ -f /app/custom/commands.py.example ] || { \
+    mkdir -p /app/custom && cp /app/custom.examples/* /app/custom/ 2>/dev/null || true; }
+
 # Wait for Web GUI setup to complete before starting the bot
 if [ ! -f /app/data/config.yaml ]; then
     echo "⏳ Waiting for Web GUI setup to complete..."

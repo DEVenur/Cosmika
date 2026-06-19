@@ -70,6 +70,32 @@ docker compose pull && docker compose up -d
 
 Your data (`data/`, `config/`, `workspace/`) lives in a Docker volume and survives updates.
 
+## Custom commands & tools
+
+The `bot` service mounts a `./custom` folder next to your `docker-compose.yml`, so
+you can add your own Discord commands and agent tools without rebuilding the image.
+On first run the folder is seeded with `*.example` templates. To activate them:
+
+```bash
+cp custom/commands.py.example custom/commands.py   # edit it, then:
+docker compose restart bot
+```
+
+See [Custom Commands & Tools](../features/extensions.md) for how to write them.
+
+!!! note "Extra Python packages"
+    If a custom tool needs a package that isn't in the image (e.g. the Google Drive
+    provider needs `google-api-python-client`), the volume mount alone isn't enough —
+    build a derived image:
+
+    ```dockerfile
+    FROM ghcr.io/zhiro-labs/dango:latest
+    RUN uv add google-api-python-client google-auth-httplib2 google-auth-oauthlib
+    ```
+
+    then point the `bot` service at it with `build:` instead of `image:`. Custom tools
+    that only use the standard library and existing dependencies work with the mount alone.
+
 ## Running on a VPS?
 
 The web dashboard has no login screen — do not expose port 17860 to the internet. See [VPS Deployment](../advanced/vps.md) for the SSH tunnel approach.

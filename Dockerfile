@@ -16,6 +16,11 @@ RUN mkdir -p /app/config.examples && \
     cp /app/config/runtime.yml.example /app/config.examples/ && \
     cp /app/config/chat_sys_prompt.txt.example /app/config.examples/
 
+# Same for custom-extension templates — the ./custom volume mount shadows /app/custom,
+# so keep a copy the entrypoint can seed into the (empty) mounted dir on first run.
+RUN mkdir -p /app/custom.examples && \
+    cp /app/custom/*.example /app/custom/README.md /app/custom.examples/
+
 RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

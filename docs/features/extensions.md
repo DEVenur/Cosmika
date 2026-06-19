@@ -236,6 +236,12 @@ async def create_event(title: str, when: str) -> str:
 - New slash commands are synced to Discord on the next startup (during `on_ready`).
   Restart the bot after adding or changing a command.
 
+!!! note "Docker deployments"
+    The official `docker-compose.yml` mounts `./custom` into the bot container and
+    seeds the `*.example` templates on first run. Drop your `.py` files in `./custom`
+    on the host and `docker compose restart bot`. Tools needing extra Python packages
+    require a derived image — see [Docker → Custom commands & tools](../getting-started/docker.md#custom-commands-tools).
+
 ## Configuration
 
 | Variable | Default | Description |
