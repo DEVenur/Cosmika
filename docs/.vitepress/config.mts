@@ -1,7 +1,20 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { defineConfig } from 'vitepress'
+import { defineConfig, type HeadConfig } from 'vitepress'
 import llmstxt from 'vitepress-plugin-llms'
+
+const SITE_ORIGIN = 'https://zhiro-labs.github.io'
+const BASE = '/dango/'
+const SITE_DESCRIPTION =
+  'Open-source Discord AI bot — connect Gemini, GPT-4o, Claude, Llama, or Ollama to your Discord server in minutes. Web UI setup, slash commands, tools, and no restarts needed.'
+const OG_IMAGE = `${SITE_ORIGIN}${BASE}og-image.png`
+
+// Absolute canonical URL for a page from its source path, honouring cleanUrls
+// (`features/models.md` → `…/dango/features/models`, `index.md` → `…/dango/`).
+function pageUrl(relativePath: string): string {
+  const clean = relativePath.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')
+  return `${SITE_ORIGIN}${BASE}${clean}`
+}
 
 // vitepress-plugin-llms injects a `url`/`description` front-matter block into
 // every generated Markdown twin. Strip it so the human-facing "View / Copy
@@ -23,8 +36,7 @@ function stripTwinFrontMatter(outDir: string): void {
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Dango',
-  description:
-    'Open-source Discord AI bot — connect Gemini, GPT-4o, Claude, Llama, or Ollama to your Discord server in minutes. Web UI setup, slash commands, tools, and no restarts needed.',
+  description: SITE_DESCRIPTION,
   lang: 'en-US',
 
   // Published at https://zhiro-labs.github.io/dango
@@ -33,11 +45,20 @@ export default defineConfig({
   lastUpdated: true,
 
   // Favicons (head hrefs are not base-prefixed automatically, so include it).
+  // Per-page Open Graph / Twitter / canonical tags are added in transformHead.
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/dango/favicon.svg' }],
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/dango/favicon-32.png' }],
     ['link', { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/dango/favicon-16.png' }],
     ['link', { rel: 'apple-touch-icon', href: '/dango/apple-touch-icon.png' }],
+    ['meta', { name: 'theme-color', content: '#7c4dff' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'Dango' }],
+    ['meta', { property: 'og:image', content: OG_IMAGE }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:image', content: OG_IMAGE }],
   ],
   // Markdown source still carries the legacy `tags`/`summary` front matter from
   // the MkDocs era — keep it, just don't fail the build on unknown keys.
@@ -88,13 +109,56 @@ export default defineConfig({
     stripTwinFrontMatter(siteConfig.outDir)
   },
 
-  // Emit a <meta name="keywords"> per page from the legacy `tags` front matter,
-  // preserving the SEO value the old MkDocs `tags` plugin provided.
+  // Per-page SEO: canonical URL, Open Graph / Twitter title+description,
+  // keywords (from the legacy `tags` front matter), and structured data.
   transformHead({ pageData }) {
-    const tags = pageData.frontmatter.tags as string[] | undefined
+    const fm = pageData.frontmatter
+    const isHome = fm.layout === 'home'
+    const url = pageUrl(pageData.relativePath)
+    const title = isHome ? 'Dango — Discord AI Bot & Agent' : `${pageData.title} | Dango`
+    const description = pageData.description || SITE_DESCRIPTION
+
+    const head: HeadConfig[] = [
+      ['link', { rel: 'canonical', href: url }],
+      ['meta', { property: 'og:title', content: title }],
+      ['meta', { property: 'og:description', content: description }],
+      ['meta', { property: 'og:url', content: url }],
+      ['meta', { name: 'twitter:title', content: title }],
+      ['meta', { name: 'twitter:description', content: description }],
+    ]
+
+    const tags = fm.tags as string[] | undefined
     if (tags?.length) {
-      return [['meta', { name: 'keywords', content: tags.join(', ') }]]
+      head.push(['meta', { name: 'keywords', content: tags.join(', ') }])
     }
+
+    if (isHome) {
+      head.push([
+        'script',
+        { type: 'application/ld+json' },
+        JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: 'Dango',
+          applicationCategory: 'DeveloperApplication',
+          operatingSystem: 'Docker, Linux, macOS, Windows',
+          description: SITE_DESCRIPTION,
+          url: `${SITE_ORIGIN}${BASE}`,
+          image: OG_IMAGE,
+          license: 'https://github.com/zhiro-labs/dango/blob/main/LICENSE',
+          isAccessibleForFree: true,
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          author: {
+            '@type': 'Organization',
+            name: 'zhiro-labs',
+            url: 'https://github.com/zhiro-labs',
+          },
+          sameAs: ['https://github.com/zhiro-labs/dango'],
+        }),
+      ])
+    }
+
+    return head
   },
 
   themeConfig: {
