@@ -25,13 +25,10 @@ hero:
 features:
   - icon: 🔌
     title: Any AI provider
-    details: "provider:model_id format — the bot sets up the right SDK and API key automatically."
+    details: "provider:model_id auto-configures the SDK and API key — cloud (Gemini, GPT-4o, Claude, Groq) or local (Ollama, LM Studio, vLLM) for fully offline runs."
   - icon: 🔀
     title: Dual-model routing
     details: Pair a fast model for simple messages and a deep model for complex ones; AUTO_ROUTE switches automatically.
-  - icon: 🖥️
-    title: Local models
-    details: Point FAST_BASE_URL at Ollama, LM Studio, or vLLM and run everything offline.
   - icon: 🖼️
     title: Table rendering
     details: Markdown tables in replies are auto-converted to PNG images (CJK font support included).
@@ -44,6 +41,9 @@ features:
   - icon: 🛠️
     title: Tools
     details: Web search (DuckDuckGo), URL fetching, workspace file access, custom APIs, SQL databases.
+  - icon: 🧰
+    title: Custom commands & tools
+    details: Drop Python files in custom/ to add your own slash commands and agent tools — no core changes, loaded on startup.
   - icon: 🧩
     title: Embeddable
     details: Drop the Cogs into any existing discord.py bot in a few lines.

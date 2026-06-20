@@ -216,6 +216,14 @@ watch(() => route.path, () => {
   text-decoration: none;
 }
 .llm-menu-item:hover { background: var(--vp-c-bg-soft); }
+/* The "View Markdown" entry is an <a>; override .vp-doc's brand link colour
+   that bleeds in once the control is teleported into the doc container. */
+.llm-menu a.llm-menu-item,
+.llm-menu a.llm-menu-item:hover {
+  color: var(--vp-c-text-1);
+  font-weight: 500;
+  text-decoration: none;
+}
 .llm-menu-sep { height: 1px; margin: 0.3rem 0.45rem; background: var(--vp-c-divider); }
 .llm-menu-label { flex: 1 1 auto; }
 .llm-menu-item .llm-ext { color: var(--vp-c-text-3); opacity: 0.8; }
