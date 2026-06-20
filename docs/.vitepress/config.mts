@@ -249,7 +249,8 @@ export default defineConfig({
     footer: {
       message:
         'MIT License · Built on <a href="https://docs.agno.com">Agno</a>',
-      copyright: '© 2025 zhiro-labs',
+      // Year is resolved at build time, so each deploy shows the current year.
+      copyright: `© ${new Date().getFullYear()} zhiro-labs`,
     },
   },
 
