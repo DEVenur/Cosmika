@@ -22,6 +22,7 @@ services:
       - ./config:/app/config
       - fonts:/app/assets/fonts
       - ./workspace:/app/workspace
+      - ./skills:/app/skills
       - ./custom:/app/custom
     restart: unless-stopped
 

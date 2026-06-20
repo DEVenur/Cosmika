@@ -21,6 +21,11 @@ RUN mkdir -p /app/config.examples && \
 RUN mkdir -p /app/custom.examples && \
     cp /app/custom/*.example /app/custom/README.md /app/custom.examples/
 
+# Same for skill templates — the ./skills volume mount shadows /app/skills,
+# so keep a copy (README + example/) the entrypoint can seed on first run.
+RUN mkdir -p /app/skills.examples && \
+    cp -r /app/skills/. /app/skills.examples/
+
 RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

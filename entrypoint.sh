@@ -13,6 +13,11 @@ set -e
 [ -f /app/custom/commands.py.example ] || { \
     mkdir -p /app/custom && cp /app/custom.examples/* /app/custom/ 2>/dev/null || true; }
 
+# Seed skill templates into the mounted ./skills on first run (empty volume).
+# Only the README and example/ template are copied — never an active SKILL.md.
+[ -f /app/skills/example/SKILL.md.example ] || { \
+    mkdir -p /app/skills && cp -r /app/skills.examples/. /app/skills/ 2>/dev/null || true; }
+
 # Wait for Web GUI setup to complete before starting the bot
 if [ ! -f /app/data/config.yaml ]; then
     echo "⏳ Waiting for Web GUI setup to complete..."
