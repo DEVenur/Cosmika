@@ -33,9 +33,11 @@ logs/
 workspace/*
 !workspace/.gitkeep
 
-# Skills (user-managed; directory is tracked, skill folders are not)
+# Skills (user-managed; templates tracked, real skill folders ignored)
 skills/*
 !skills/.gitkeep
+!skills/README.md
+!skills/example/
 
 # Custom developer extensions (user-managed; templates tracked, real files ignored)
 custom/*
