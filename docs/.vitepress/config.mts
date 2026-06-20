@@ -31,6 +31,14 @@ export default defineConfig({
   base: '/dango/',
   cleanUrls: true,
   lastUpdated: true,
+
+  // Favicons (head hrefs are not base-prefixed automatically, so include it).
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/dango/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/dango/favicon-32.png' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/dango/favicon-16.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/dango/apple-touch-icon.png' }],
+  ],
   // Markdown source still carries the legacy `tags`/`summary` front matter from
   // the MkDocs era — keep it, just don't fail the build on unknown keys.
   ignoreDeadLinks: false,
@@ -91,6 +99,8 @@ export default defineConfig({
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/logo.svg',
+
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Getting Started', link: '/getting-started/discord-setup' },
