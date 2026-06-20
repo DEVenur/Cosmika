@@ -6,7 +6,10 @@ on:
       - main
     paths:
       - "docs/**"
-      - "mkdocs.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
@@ -19,9 +22,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     # Runs only on the upstream repo. Forks: change the owner below to your own
@@ -31,15 +31,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: "22"
+          cache: pnpm
 
       - name: Install dependencies
-        run: pip install mkdocs-material
+        run: pnpm install --frozen-lockfile
 
       - name: Build docs
-        run: mkdocs build
+        run: pnpm run docs:build
 
       # enablement: true turns Pages on automatically, so forks that enable this
       # workflow don't need to flip the Pages setting by hand first.
@@ -49,7 +52,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/
+          path: docs/.vitepress/dist
 
   deploy:
     runs-on: ubuntu-latest
