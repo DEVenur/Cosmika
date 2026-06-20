@@ -91,15 +91,16 @@ ENABLE_CUSTOM_APIS=on
 CUSTOM_APIS_JSON=[{"name": "weather", "base_url": "https://api.example.com", "api_key": "secret", "description": "Weather API"}]
 ```
 
-!!! warning "Single-line requirement"
-    `CUSTOM_APIS_JSON` must be a single line in `.env`. Multi-line JSON silently fails — the variable is empty and no tools are created, with no error message.
+::: warning Single-line requirement
+`CUSTOM_APIS_JSON` must be a single line in `.env`. Multi-line JSON silently fails — the variable is empty and no tools are created, with no error message.
 
-    Compress your JSON to a single line before pasting:
-    ```bash
-    echo '[{"name":"weather",...}]' | jq -c '.'
-    ```
+Compress your JSON to a single line before pasting:
+```bash
+echo '[{"name":"weather",...}]' | jq -c '.'
+```
 
-    The Docker web dashboard handles this automatically — use it if you want to avoid the formatting entirely.
+The Docker web dashboard handles this automatically — use it if you want to avoid the formatting entirely.
+:::
 
 Each entry creates a tool named `call_<name>_api`. The model decides when to call it based on the `description` field — be descriptive about what the API does and what kind of questions should trigger it. When the bot calls the tool, it can send `GET` or `POST` to any path under `base_url`, pass query parameters and a JSON body, with Bearer auth automatically added if `api_key` is set.
 

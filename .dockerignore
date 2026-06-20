@@ -16,3 +16,11 @@ workspace/
 CLAUDE.md
 README.md
 LICENSE
+
+# Docs site (VitePress) — not needed in the bot image
+docs/
+node_modules/
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+.poc/

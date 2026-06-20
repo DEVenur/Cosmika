@@ -144,20 +144,22 @@ own Discord permissions before doing anything:
         return "You need Manage Server to do that."
 ```
 
-!!! note "Mention/permission fields and the agent path"
-    `mentioned_user_ids` and `mentioned_role_ids` come from the triggering chat
-    message, so they populate on the **agent path** and are empty for slash
-    commands (which carry no message mentions). `author_permissions` is
-    populated on **both** paths but is empty in DMs, where there is no guild to
-    grant permissions.
+::: info Mention/permission fields and the agent path
+`mentioned_user_ids` and `mentioned_role_ids` come from the triggering chat
+message, so they populate on the **agent path** and are empty for slash
+commands (which carry no message mentions). `author_permissions` is
+populated on **both** paths but is empty in DMs, where there is no guild to
+grant permissions.
+:::
 
-!!! warning "Acting on the IDs needs a Discord client"
-    The IDs identify who was tagged, but mutating Discord state (adding roles,
-    fetching members) needs a `discord.py` client. `ctx.bot` is set **only on
-    the command path** — on the agent path it is `None`. So agent-path tools can
-    *reference* mentioned users/roles (build mention strings, gate on
-    permissions, return them for the model to reason about) but cannot perform
-    member/role mutations directly.
+::: warning Acting on the IDs needs a Discord client
+The IDs identify who was tagged, but mutating Discord state (adding roles,
+fetching members) needs a `discord.py` client. `ctx.bot` is set **only on
+the command path** — on the agent path it is `None`. So agent-path tools can
+*reference* mentioned users/roles (build mention strings, gate on
+permissions, return them for the model to reason about) but cannot perform
+member/role mutations directly.
+:::
 
 ## Using built-in Agno toolkits & context providers
 
@@ -184,11 +186,12 @@ the filesystem, and more. Some need extra packages and credentials — e.g. Driv
 needs `google-api-python-client google-auth-httplib2 google-auth-oauthlib` plus
 OAuth. Install those in your clone the usual way (`uv add ...`).
 
-!!! note "Agno's Scheduler does not apply"
-    Agno's [Scheduler](https://docs.agno.com/scheduler/overview) is a runtime/cron
-    orchestration layer that drives AgentOS endpoints — it is not a tool and does
-    not plug into Dango's discord.py + Workflow model. For scheduled behaviour,
-    use `discord.ext.tasks` or an external cron job.
+::: info Agno's Scheduler does not apply
+Agno's [Scheduler](https://docs.agno.com/scheduler/overview) is a runtime/cron
+orchestration layer that drives AgentOS endpoints — it is not a tool and does
+not plug into Dango's discord.py + Workflow model. For scheduled behaviour,
+use `discord.ext.tasks` or an external cron job.
+:::
 
 ## Interactive UI (modals, buttons, selects) — not supported here
 
@@ -236,11 +239,12 @@ async def create_event(title: str, when: str) -> str:
 - New slash commands are synced to Discord on the next startup (during `on_ready`).
   Restart the bot after adding or changing a command.
 
-!!! note "Docker deployments"
-    The official `docker-compose.yml` mounts `./custom` into the bot container and
-    seeds the `*.example` templates on first run. Drop your `.py` files in `./custom`
-    on the host and `docker compose restart bot`. Tools needing extra Python packages
-    require a derived image — see [Docker → Custom commands & tools](../getting-started/docker.md#custom-commands-tools).
+::: info Docker deployments
+The official `docker-compose.yml` mounts `./custom` into the bot container and
+seeds the `*.example` templates on first run. Drop your `.py` files in `./custom`
+on the host and `docker compose restart bot`. Tools needing extra Python packages
+require a derived image — see [Docker → Custom commands & tools](../getting-started/docker.md#custom-commands-tools).
+:::
 
 ## Configuration
 

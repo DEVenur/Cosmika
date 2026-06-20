@@ -70,13 +70,14 @@ async def setup_hook():
 That is the whole integration. `ChatCog` handles incoming messages; `AdminCog`
 adds admin slash commands (optional). Everything else is configuration.
 
-!!! warning "Three things that will bite you"
-    - **`load_dotenv()` before imports.** dango resolves model/feature settings at
-      import time. Importing before `.env` is loaded silently uses defaults.
-    - **`uv run` does not load `.env`.** You must call `load_dotenv()` yourself —
-      `uv` only injects shell-exported variables.
-    - **Register Cogs in `setup_hook`, never `on_ready`.** `setup_hook` runs once
-      before the gateway connects, so no events are missed.
+::: warning Three things that will bite you
+- **`load_dotenv()` before imports.** dango resolves model/feature settings at
+  import time. Importing before `.env` is loaded silently uses defaults.
+- **`uv run` does not load `.env`.** You must call `load_dotenv()` yourself —
+  `uv` only injects shell-exported variables.
+- **Register Cogs in `setup_hook`, never `on_ready`.** `setup_hook` runs once
+  before the gateway connects, so no events are missed.
+:::
 
 ### Required intents
 
