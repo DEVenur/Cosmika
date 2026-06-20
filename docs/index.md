@@ -36,6 +36,9 @@ features:
   - icon: ⚙️
     title: Web dashboard
     details: Browser-based setup wizard and admin UI — no config file editing needed.
+  - icon: ♻️
+    title: No restarts
+    details: Channels, users, history limit, timezone, and activity are all adjustable live via slash commands.
   - icon: 🎓
     title: Skills
     details: Drop a folder with a SKILL.md into skills/ and the bot loads its instructions, scripts, and references on demand — no code needed.
