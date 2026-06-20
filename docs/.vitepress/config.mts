@@ -249,8 +249,9 @@ export default defineConfig({
     footer: {
       message:
         'MIT License · Built on <a href="https://docs.agno.com">Agno</a>',
-      // Year is resolved at build time, so each deploy shows the current year.
-      copyright: `© ${new Date().getFullYear()} zhiro-labs`,
+      // Build-time year as the SSR/no-JS fallback; the theme's setup() updates
+      // the .footer-year span to the visitor's current year at runtime.
+      copyright: `© <span class="footer-year">${new Date().getFullYear()}</span> zhiro-labs`,
     },
   },
 
