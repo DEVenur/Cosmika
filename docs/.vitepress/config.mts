@@ -6,7 +6,7 @@ import llmstxt from 'vitepress-plugin-llms'
 const SITE_ORIGIN = 'https://zhiro-labs.github.io'
 const BASE = '/dango/'
 const SITE_DESCRIPTION =
-  'Open-source Discord AI bot — connect Gemini, GPT-4o, Claude, Llama, or Ollama to your Discord server in minutes. Web UI setup, slash commands, tools, and no restarts needed.'
+  'Dango is a free, open-source, self-hosted Discord AI bot and agent — connect Gemini, GPT-4o, Claude, Llama, or Ollama and run your own Discord AI on your server in minutes. Web UI setup, slash commands, tools, no restarts.'
 const OG_IMAGE = `${SITE_ORIGIN}${BASE}og-image.png`
 
 // Site-wide target keywords, emitted on every page (merged with each page's
@@ -16,8 +16,11 @@ const BASE_KEYWORDS = [
   'Discord AI bot',
   'Discord AI agent',
   'Discord AI chatbot',
+  'self-hosted Discord AI bot',
+  'free Discord AI bot',
   'Discord bot',
   'AI chatbot',
+  'Dango',
 ]
 
 // Absolute canonical URL for a page from its source path, honouring cleanUrls

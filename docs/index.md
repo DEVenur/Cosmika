@@ -2,7 +2,7 @@
 layout: home
 title: "Dango — Discord AI Bot & Agent"
 titleTemplate: false
-description: "Dango is a free, open-source Discord AI bot and agent. Connect Gemini, GPT-4o, Claude, Llama, or Ollama to your Discord server in minutes — no code changes needed."
+description: "Dango is a free, open-source, self-hosted Discord AI bot and agent. Connect Gemini, GPT-4o, Claude, Llama, or Ollama and run your own Discord AI on your server in minutes — no code changes needed."
 tags:
   - Getting Started
   - Discord bot
@@ -50,7 +50,7 @@ features:
     details: Drop the Cogs into any existing discord.py bot in a few lines.
 ---
 
-**Dango** is a free, open-source **Discord AI** bot and agent built on [Agno](https://docs.agno.com). Connect any model provider — Google Gemini, GPT-4o, Claude, Llama, Groq, or local Ollama — and run a capable Discord AI chatbot and agent on your own server in minutes, with no code changes.
+**Dango** is a free, open-source, self-hosted **Discord AI** bot and agent built on [Agno](https://docs.agno.com). Connect any model provider — Google Gemini, GPT-4o, Claude, Llama, Groq, or local Ollama — and run your own Discord AI chatbot and agent on your server in minutes, with no code changes.
 
 ## Before you start
 
