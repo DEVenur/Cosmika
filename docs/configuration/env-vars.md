@@ -12,6 +12,8 @@ tags:
 
 Configuration lives in `.env` (uv path) or `data/config.yaml` (Docker / web dashboard). Both map to the same environment variables described here.
 
+The `data/config.yaml` file is normally written by the web setup wizard, but for headless deploys you can hand-write it: copy [`config.yaml.example`](https://github.com/zhiro-labs/dango/blob/main/config.yaml.example) to `data/config.yaml` and edit. (The uv path uses [`.env.example`](https://github.com/zhiro-labs/dango/blob/main/.env.example) instead.)
+
 ::: warning `on`/`off` vs `true`/`false`
 Most variables use `on`/`off`. The `GEMINI_*` variables use `true`/`false` because they are passed directly to the Google SDK.
 
