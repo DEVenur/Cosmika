@@ -120,6 +120,11 @@ ENABLE_WORKSPACE = env_onoff_to_bool(os.getenv("ENABLE_WORKSPACE"))
 WORKSPACE_ROOT = os.path.abspath(os.getenv("WORKSPACE_ROOT", "workspace"))
 WORKSPACE_ALLOWED: list[str] = ["read", "list", "search"]
 
+# ── Skills ──────────────────────────────────────────────────────────────────
+ENABLE_SKILLS = env_onoff_to_bool(os.getenv("ENABLE_SKILLS"))
+# Resolve to absolute path at startup so the scope is always unambiguous.
+SKILLS_ROOT = os.path.abspath(os.getenv("SKILLS_ROOT", "skills"))
+
 # ── Web / search tools ────────────────────────────────────────────────────────
 ENABLE_DUCKDUCKGO = env_onoff_to_bool(os.getenv("ENABLE_DUCKDUCKGO"))
 ENABLE_BRAVE_SEARCH = env_onoff_to_bool(os.getenv("ENABLE_BRAVE_SEARCH"))
@@ -473,6 +478,38 @@ def _make_db_provider(name: str, db_url: str, description: str = "") -> list:
     return provider.get_tools()
 
 
+def _make_skills():
+    """Build a Skills bundle from SKILLS_ROOT, or None when disabled/empty.
+
+    Skills are self-contained directories (each with a SKILL.md) that the agent
+    loads on demand via Agno's built-in get_skill_* tools. Validation stays on:
+    a malformed SKILL.md raises SkillValidationError, which we re-raise with a
+    clear, actionable message instead of letting skills be silently dropped.
+    """
+    if not ENABLE_SKILLS:
+        return None
+    if not os.path.isdir(SKILLS_ROOT):
+        print(f"⚠️  ENABLE_SKILLS is on but SKILLS_ROOT '{SKILLS_ROOT}' does not exist — skills disabled")
+        return None
+
+    from agno.skills import LocalSkills, Skills
+
+    try:
+        skills = Skills(loaders=[LocalSkills(SKILLS_ROOT)])
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to load skills from '{SKILLS_ROOT}': {e}. "
+            "Fix the offending SKILL.md or set ENABLE_SKILLS=off."
+        ) from e
+
+    names = skills.get_skill_names()
+    if not names:
+        print(f"⚠️  SKILLS_ROOT '{SKILLS_ROOT}' contains no skills — skills disabled")
+        return None
+    print(f"🧩 [skills] Loaded {len(names)} skill(s): {', '.join(names)}")
+    return skills
+
+
 def _make_agent(model: _DangoGemini | object | str) -> Agent:
     tools = []
     if ENABLE_WORKSPACE:
@@ -512,6 +549,7 @@ def _make_agent(model: _DangoGemini | object | str) -> Agent:
     return Agent(
         model=model,
         tools=tools or None,
+        skills=_make_skills(),
         instructions=_dynamic_instructions,
         # Time is injected inside _dynamic_instructions (reads runtime_config.timezone each call),
         # so add_datetime_to_context is intentionally off.

@@ -51,6 +51,10 @@ def inject_config_to_env() -> str | None:
     _set("ENABLE_WORKSPACE",    _onoff(cfg.get("enable_workspace", False)))
     _set("WORKSPACE_ROOT",      cfg.get("workspace_root", "workspace"))
 
+    # ── Skills ───────────────────────────────────────────────────────────────
+    _set("ENABLE_SKILLS",       _onoff(cfg.get("enable_skills", False)))
+    _set("SKILLS_ROOT",         cfg.get("skills_root", "skills"))
+
     # ── Web / search tools ────────────────────────────────────────────────────
     _set("ENABLE_DUCKDUCKGO",      _onoff(cfg.get("enable_duckduckgo", False)))
     _set("ENABLE_BRAVE_SEARCH",    _onoff(cfg.get("enable_brave_search", False)))

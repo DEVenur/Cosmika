@@ -82,6 +82,43 @@ On startup, the bot uses the LLM to write a short description of `WORKSPACE_ROOT
 | LLM returns an empty response during generation | A warning is printed (`⚠️ Workspace context generation returned empty`) and the context file is not written. Bot continues without workspace context. |
 | File exceeds 10 MB | The file is silently skipped by the workspace tool. |
 
+## Skills
+
+A **skill** is a self-contained folder that packages instructions (and optional scripts/references) for a specific capability. Unlike a regular tool, a skill's instructions are loaded *on demand* — the bot reads them only when it decides the skill is relevant, keeping the base context lean.
+
+```env
+ENABLE_SKILLS=on
+SKILLS_ROOT=skills          # relative or absolute path
+```
+
+Drop one folder per skill into `SKILLS_ROOT`. The default `skills/` folder lives inside the project directory and its contents are gitignored.
+
+```
+dango/
+└── skills/
+    └── my-skill/
+        ├── SKILL.md          # required: when & how to use the skill (YAML frontmatter + body)
+        ├── scripts/          # optional: runnable script templates
+        └── references/       # optional: supporting docs
+```
+
+Each `SKILL.md` must start with YAML frontmatter, for example:
+
+```markdown
+---
+name: greet
+description: Greet a user warmly in their own language.
+---
+
+When the user says hello, reply with a warm greeting that matches their language.
+```
+
+At runtime the bot gains Agno's built-in `get_skill_instructions`, `get_skill_reference`, and `get_skill_script` tools to pull skill content as needed.
+
+::: warning Validation is strict
+A malformed `SKILL.md` (e.g. missing frontmatter) **aborts startup** with a clear error such as `Failed to load skills from '…': SKILL.md must start with YAML frontmatter (---)`. This is intentional — broken skills are never silently dropped. Fix the file or set `ENABLE_SKILLS=off`.
+:::
+
 ## Custom API Tools
 
 Plug any HTTP API into the bot through the web dashboard — no code changes needed.

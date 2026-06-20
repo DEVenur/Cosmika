@@ -515,6 +515,18 @@ async def save_workspace(
     return _SAVED_R
 
 
+@app.post("/api/config/skills", response_class=HTMLResponse)
+async def save_skills(
+    enable_skills: str = Form("off"),
+    skills_root: str = Form("skills"),
+):
+    config = load_config()
+    config.enable_skills = enable_skills == "on"
+    config.skills_root = skills_root.strip() or "skills"
+    save_config(config)
+    return _SAVED_R
+
+
 @app.post("/api/runtime/settings", response_class=HTMLResponse)
 async def save_runtime_settings(
     timezone: str = Form("UTC"),

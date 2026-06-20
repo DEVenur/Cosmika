@@ -78,6 +78,53 @@
     </div>
   </div>
 
+  <!-- ── Skills ────────────────────────────────────────────────────── -->
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+
+      <div>
+        <h2 class="font-semibold text-sm">Skills</h2>
+        <p class="text-xs text-base-content/45 mt-0.5">Drop self-contained skill folders (each with a <code class="font-mono">SKILL.md</code>) into the skills directory. The bot loads them on demand.</p>
+      </div>
+
+      <form hx-post="/api/config/skills" hx-target="#skills-status" hx-swap="innerHTML" class="flex flex-col gap-3">
+
+        <div class="divide-y divide-base-200 rounded-lg border border-base-200">
+          <div class="flex justify-between items-center px-4 py-3">
+            <div>
+              <p class="text-sm font-medium">Enable Skills</p>
+              <p class="text-xs text-base-content/45">Load skill folders when the bot starts</p>
+            </div>
+            <input type="checkbox" name="enable_skills" value="on"
+              class="toggle toggle-primary toggle-sm"
+              {% if config.enable_skills %}checked{% endif %} />
+          </div>
+          <div class="px-4 py-3">
+            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Directory Path</span></label>
+            <div class="flex gap-2">
+              <input id="skills-root-input" name="skills_root" type="text"
+                value="{{ config.skills_root }}"
+                placeholder="skills"
+                class="input input-bordered input-sm flex-1 font-mono" />
+              <button type="button" class="btn btn-ghost btn-sm text-xs"
+                onclick="document.getElementById('skills-root-input').value='skills'">Reset</button>
+            </div>
+            <p class="text-xs text-base-content/35 mt-1">Relative to the bot's working directory, or an absolute path.</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-base-content/45">A malformed <code class="font-mono">SKILL.md</code> stops the bot at startup with a clear error, so broken skills are never silently ignored.</p>
+
+        <div class="flex justify-end items-center gap-3">
+          <span id="skills-status" class="text-sm"></span>
+          <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
   <!-- ── Custom REST APIs ───────────────────────────────────────────── -->
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body gap-4">

@@ -88,6 +88,15 @@ When the bot runs in Docker and the model server runs on the host, use `host.doc
 
 See [Tools](../features/tools.md) for more on workspace behaviour.
 
+## Skills
+
+| Variable | Default | Description |
+|---|---|---|
+| `ENABLE_SKILLS` | `off` | **`on`/`off`** — let the bot load skills from `SKILLS_ROOT` on demand |
+| `SKILLS_ROOT` | `skills/` | Folder holding skill subfolders, each with a `SKILL.md` |
+
+A malformed `SKILL.md` aborts startup with a clear error rather than being silently skipped. See [Tools](../features/tools.md) for the skill folder layout.
+
 ## Custom tools
 
 | Variable | Default | Description |

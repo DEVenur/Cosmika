@@ -39,6 +39,10 @@ class BotConfig(BaseModel):
     workspace_root: str = "workspace"
     workspace_allowed: str = "read,list,search"
 
+    # ── Skills ───────────────────────────────────────────────────────────────
+    enable_skills: bool = False
+    skills_root: str = "skills"
+
     # ── Web / search tools ────────────────────────────────────────────────────
     enable_duckduckgo: bool = False
     enable_brave_search: bool = False
