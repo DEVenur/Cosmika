@@ -1,14 +1,15 @@
-# Dango bot configuration (Docker / Web dashboard path).
+# ==============================================================================
+#  Dango configuration — config.yaml (Docker / web dashboard path)
+# ==============================================================================
+#  Normally written for you by the web setup wizard at http://localhost:17860
+#  (saved to data/config.yaml). For advanced / headless deploys, hand-write it:
 #
-# Normally this file is written for you by the Web setup wizard at
-# http://localhost:17860 and lives at data/config.yaml. This example is for
-# advanced/headless deploys that want to hand-write it instead:
+#      cp config.yaml.example data/config.yaml   # then edit and start the bot
 #
-#   cp config.yaml.example data/config.yaml   # then edit and start the bot
-#
-# Every key below maps to the matching UPPER_CASE environment variable (see
-# .env.example and docs/configuration/env-vars.md). The .env path and this
-# config.yaml path are mutually exclusive — use one or the other.
+#  Every key maps to the matching UPPER_CASE env var (see .env.example and
+#  docs/configuration/env-vars.md). The .env and config.yaml paths are mutually
+#  exclusive — use one or the other.
+# ==============================================================================
 
 config_version: "1"
 
