@@ -9,6 +9,17 @@ const SITE_DESCRIPTION =
   'Open-source Discord AI bot — connect Gemini, GPT-4o, Claude, Llama, or Ollama to your Discord server in minutes. Web UI setup, slash commands, tools, and no restarts needed.'
 const OG_IMAGE = `${SITE_ORIGIN}${BASE}og-image.png`
 
+// Site-wide target keywords, emitted on every page (merged with each page's
+// own `tags`). Leads with the "Discord AI" phrasing we want to rank for.
+const BASE_KEYWORDS = [
+  'Discord AI',
+  'Discord AI bot',
+  'Discord AI agent',
+  'Discord AI chatbot',
+  'Discord bot',
+  'AI chatbot',
+]
+
 // Absolute canonical URL for a page from its source path, honouring cleanUrls
 // (`features/models.md` → `…/dango/features/models`, `index.md` → `…/dango/`).
 function pageUrl(relativePath: string): string {
@@ -127,10 +138,9 @@ export default defineConfig({
       ['meta', { name: 'twitter:description', content: description }],
     ]
 
-    const tags = fm.tags as string[] | undefined
-    if (tags?.length) {
-      head.push(['meta', { name: 'keywords', content: tags.join(', ') }])
-    }
+    const tags = (fm.tags as string[] | undefined) ?? []
+    const keywords = [...new Set([...BASE_KEYWORDS, ...tags])].join(', ')
+    head.push(['meta', { name: 'keywords', content: keywords }])
 
     if (isHome) {
       head.push([
@@ -140,9 +150,11 @@ export default defineConfig({
           '@context': 'https://schema.org',
           '@type': 'SoftwareApplication',
           name: 'Dango',
+          alternateName: 'Dango — Discord AI Bot & Agent',
           applicationCategory: 'DeveloperApplication',
           operatingSystem: 'Docker, Linux, macOS, Windows',
           description: SITE_DESCRIPTION,
+          keywords: BASE_KEYWORDS.join(', '),
           url: `${SITE_ORIGIN}${BASE}`,
           image: OG_IMAGE,
           license: 'https://github.com/zhiro-labs/dango/blob/main/LICENSE',
@@ -171,6 +183,9 @@ export default defineConfig({
       { text: 'Configuration', link: '/configuration/env-vars' },
       { text: 'Features', link: '/features/models' },
       { text: 'Usage', link: '/usage/commands' },
+      // External link — VitePress appends the ↗ indicator automatically. Sits
+      // beside Usage; the redundant socialLinks GitHub icon is dropped below.
+      { text: 'GitHub', link: 'https://github.com/zhiro-labs/dango' },
     ],
 
     sidebar: [
@@ -219,10 +234,6 @@ export default defineConfig({
           { text: 'Troubleshooting', link: '/troubleshooting' },
         ],
       },
-    ],
-
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/zhiro-labs/dango' },
     ],
 
     search: { provider: 'local' },
