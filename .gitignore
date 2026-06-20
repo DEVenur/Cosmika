@@ -45,3 +45,11 @@ data/
 # MkDocs build output (deploy via mkdocs gh-deploy, not committed to main)
 site/
 docs/assets/
+
+# Docs migration PoC (scratch)
+.poc/
+
+# Node / VitePress docs
+node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/

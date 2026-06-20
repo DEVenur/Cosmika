@@ -83,18 +83,19 @@ docker compose restart bot
 
 See [Custom Commands & Tools](../features/extensions.md) for how to write them.
 
-!!! note "Extra Python packages"
-    If a custom tool needs a package that isn't in the image (e.g. the Google Drive
-    provider needs `google-api-python-client`), the volume mount alone isn't enough —
-    build a derived image:
+::: info Extra Python packages
+If a custom tool needs a package that isn't in the image (e.g. the Google Drive
+provider needs `google-api-python-client`), the volume mount alone isn't enough —
+build a derived image:
 
-    ```dockerfile
-    FROM ghcr.io/zhiro-labs/dango:latest
-    RUN uv add google-api-python-client google-auth-httplib2 google-auth-oauthlib
-    ```
+```dockerfile
+FROM ghcr.io/zhiro-labs/dango:latest
+RUN uv add google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
 
-    then point the `bot` service at it with `build:` instead of `image:`. Custom tools
-    that only use the standard library and existing dependencies work with the mount alone.
+then point the `bot` service at it with `build:` instead of `image:`. Custom tools
+that only use the standard library and existing dependencies work with the mount alone.
+:::
 
 ## Running on a VPS?
 

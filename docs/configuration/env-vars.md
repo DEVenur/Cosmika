@@ -11,12 +11,13 @@ tags:
 
 Configuration lives in `.env` (uv path) or `data/config.yaml` (Docker / web dashboard). Both map to the same environment variables described here.
 
-!!! warning "`on`/`off` vs `true`/`false`"
-    Most variables use `on`/`off`. The `GEMINI_*` variables use `true`/`false` because they are passed directly to the Google SDK.
+::: warning `on`/`off` vs `true`/`false`
+Most variables use `on`/`off`. The `GEMINI_*` variables use `true`/`false` because they are passed directly to the Google SDK.
 
-    **Mixing them up silently disables the feature** — `ENABLE_DUCKDUCKGO=true` will not report an error but the tool will not be registered.
+**Mixing them up silently disables the feature** — `ENABLE_DUCKDUCKGO=true` will not report an error but the tool will not be registered.
 
-    Each variable in the tables below shows its accepted values.
+Each variable in the tables below shows its accepted values.
+:::
 
 ## Required
 
