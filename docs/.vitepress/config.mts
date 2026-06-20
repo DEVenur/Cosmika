@@ -1,5 +1,24 @@
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { defineConfig } from 'vitepress'
 import llmstxt from 'vitepress-plugin-llms'
+
+// vitepress-plugin-llms injects a `url`/`description` front-matter block into
+// every generated Markdown twin. Strip it so the human-facing "View / Copy
+// Markdown" output is clean prose — the front matter only ever existed to feed
+// llms.txt generation, and should never surface to a reader.
+const FRONT_MATTER = /^---\r?\n[\s\S]*?\r?\n---\r?\n+/
+
+function stripTwinFrontMatter(outDir: string): void {
+  for (const entry of readdirSync(outDir, { recursive: true }) as string[]) {
+    if (!entry.endsWith('.md')) continue
+    const file = join(outDir, entry)
+    const text = readFileSync(file, 'utf-8')
+    if (FRONT_MATTER.test(text)) {
+      writeFileSync(file, text.replace(FRONT_MATTER, ''), 'utf-8')
+    }
+  }
+}
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -23,6 +42,12 @@ export default defineConfig({
   markdown: {
     // `.env` code fences highlight as ini (Shiki has no dedicated `env` grammar).
     languageAlias: { env: 'ini' },
+  },
+
+  // Runs after the SSG build (and after vitepress-plugin-llms has written the
+  // Markdown twins), so it can clean up their generated front matter.
+  buildEnd(siteConfig) {
+    stripTwinFrontMatter(siteConfig.outDir)
   },
 
   // Emit a <meta name="keywords"> per page from the legacy `tags` front matter,
