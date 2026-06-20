@@ -2,6 +2,7 @@
   "name": "dango-docs",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.5.1",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
