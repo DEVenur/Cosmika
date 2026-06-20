@@ -42,6 +42,36 @@ export default defineConfig({
   markdown: {
     // `.env` code fences highlight as ini (Shiki has no dedicated `env` grammar).
     languageAlias: { env: 'ini' },
+
+    // Drop an anchor right after the page's intro paragraph (the lede that
+    // follows the H1), before the first `##` section. CopyForLLM.vue teleports
+    // the "Copy page" control onto it, so the button sits below the title and
+    // opening text rather than above the heading.
+    config(md) {
+      md.core.ruler.push('llm_copy_anchor', (state) => {
+        const tokens = state.tokens
+        const firstH2 = tokens.findIndex(
+          (t) => t.type === 'heading_open' && t.tag === 'h2',
+        )
+        const firstParaClose = tokens.findIndex(
+          (t) => t.type === 'paragraph_close',
+        )
+
+        let at: number
+        if (firstParaClose !== -1 && (firstH2 === -1 || firstParaClose < firstH2)) {
+          at = firstParaClose + 1 // after the intro lede paragraph
+        } else if (firstH2 !== -1) {
+          at = firstH2 // page jumps straight to a section — sit under the H1
+        } else {
+          return // no headings/paragraphs (e.g. the home page body) — skip
+        }
+
+        const anchor = new state.Token('html_block', '', 0)
+        anchor.content = '<div class="vp-llm-copy-anchor"></div>\n'
+        anchor.block = true
+        tokens.splice(at, 0, anchor)
+      })
+    },
   },
 
   // Runs after the SSG build (and after vitepress-plugin-llms has written the

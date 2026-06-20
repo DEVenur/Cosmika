@@ -3,7 +3,7 @@
 // Ported from the old docs/javascripts/copy-page.js (MkDocs build). Reads the
 // same-origin Markdown twin emitted by vitepress-plugin-llms and offers
 // copy / view Markdown plus "Open in <assistant>" deep links.
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 
 const ICONS = {
@@ -38,6 +38,15 @@ const mdAbs = ref('')
 const open = ref(false)
 const toastMsg = ref('')
 let toastTimer: ReturnType<typeof setTimeout> | undefined
+
+// The button is teleported onto the anchor that the markdown-it rule drops
+// after each page's intro lede, so it renders below the title and opening text.
+const target = ref<HTMLElement | null>(null)
+async function locateAnchor() {
+  target.value = null
+  await nextTick()
+  target.value = document.querySelector<HTMLElement>('.vp-llm-copy-anchor')
+}
 
 function showToast(msg: string) {
   toastMsg.value = msg
@@ -90,6 +99,7 @@ onMounted(() => {
   mdAbs.value = new URL(mdRel.value, location.href).href
   document.addEventListener('click', onOutside, true)
   document.addEventListener('keydown', onKey, true)
+  locateAnchor()
 })
 onBeforeUnmount(() => {
   document.removeEventListener('click', onOutside, true)
@@ -98,10 +108,12 @@ onBeforeUnmount(() => {
 watch(() => route.path, () => {
   if (typeof location !== 'undefined') mdAbs.value = new URL(mdRel.value, location.href).href
   open.value = false
+  locateAnchor()
 })
 </script>
 
 <template>
+  <Teleport v-if="target" :to="target">
   <div class="llm-copy">
     <button type="button" class="llm-btn llm-btn-main" @click="copyPage">
       <span v-html="ICONS.copy" /><span class="llm-btn-text">Copy page</span>
@@ -139,6 +151,7 @@ watch(() => route.path, () => {
       </button>
     </div>
   </div>
+  </Teleport>
   <Teleport to="body">
     <div class="llm-toast" :class="{ 'llm-toast--show': toastMsg }">{{ toastMsg }}</div>
   </Teleport>
@@ -149,7 +162,9 @@ watch(() => route.path, () => {
   position: relative;
   display: inline-flex;
   flex: 0 0 auto;
-  margin: 0 0 1.5rem;
+  /* Sits between the intro lede and the first section heading, whose own
+     top margin provides the spacing below — so only a small top gap here. */
+  margin: 0.25rem 0 0;
   font-size: 0.78rem;
   white-space: nowrap;
 }
