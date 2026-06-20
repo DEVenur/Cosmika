@@ -1,8 +1,9 @@
 ---
-summary: "DuckDuckGo search, website fetching, workspace file access, custom HTTP APIs, SQL databases."
-description: "Extend Dango with web search (DuckDuckGo, Brave Search), URL fetching, workspace file access, custom HTTP API tools, and SQL database queries — all configurable from the web dashboard."
+summary: "DuckDuckGo search, website fetching, workspace file access, on-demand skills, custom HTTP APIs, SQL databases."
+description: "Extend Dango with web search (DuckDuckGo, Brave Search), URL fetching, workspace file access, on-demand skills (SKILL.md folders), custom HTTP API tools, and SQL database queries — all configurable from the web dashboard."
 tags:
   - Tools
+  - Skills
   - Web search
   - SQL
   - Custom APIs
