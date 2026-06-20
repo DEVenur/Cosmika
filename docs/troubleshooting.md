@@ -1,8 +1,37 @@
 ---
-summary: "Fixes for common issues — bot not responding, `/addchannel` having no effect, `on`/`off` vs `true`/`false` env-var formats, Gemini Search vs DuckDuckGo, error-fallback messages, `CUSTOM_APIS_JSON` parsing, testing custom tools, and workspace context."
+summary: "Fixes for common issues — Dango system messages like [dango-sysinfo] and [dango_replaced_table_…_as_image], bot not responding, `/addchannel` having no effect, `on`/`off` vs `true`/`false` env-var formats, Gemini Search vs DuckDuckGo, error-fallback messages, `CUSTOM_APIS_JSON` parsing, testing custom tools, and workspace context."
+tags:
+  - Troubleshooting
+  - dango-sysinfo
+  - dango_replaced_table
+  - Dango system messages
 ---
 
 # Troubleshooting
+
+## Dango system messages in Discord (`[dango-sysinfo]`, `[dango_replaced_table_…_as_image]`)
+
+If you see a `[dango-sysinfo]` or `[dango_replaced_table_…_as_image]` marker in a Dango message, these are normal **Dango** system tokens — not errors or spam. Here is what each one means.
+
+### `[dango-sysinfo]`
+
+Dango prefixes its own status notes in the channel with a `> [dango-sysinfo]` blockquote. They are visible to users but stripped from the model's conversation history, so they never affect later replies. The most common one is the [error-fallback](#fallback-on-error-fires-what-does-the-message-look-like) notice:
+
+```
+> [dango-sysinfo] ⚡ google:gemini-2.0-flash failed — response served by google:gemini-2.5-pro.
+```
+
+### `[dango_replaced_table_…_as_image]`
+
+When a reply contains a Markdown table, Dango renders it as a PNG image (CJK fonts included) so it stays readable on mobile, and leaves a placeholder in the text where the table was:
+
+```
+> `[dango_replaced_table_1399812345678901234_1_as_image]`
+```
+
+The two numbers are the Discord **message ID** and the table's position in the reply (`_1_` for the first table, `_2_` for the second, and so on). The rendered table is attached to the same message as an image — nothing is lost.
+
+---
 
 ## Bot doesn't respond at all
 
