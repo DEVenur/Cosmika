@@ -284,3 +284,137 @@ class ChatCog(commands.Cog):
                 )
             except Exception:
                 pass
+
+    @app_commands.command(
+        name="skill",
+        description="Send a message and force a specific skill to be applied",
+    )
+    @app_commands.describe(
+        name="The skill to apply",
+        message="Your message",
+        image="Optional image attachment",
+    )
+    async def skill_command(
+        self,
+        interaction: discord.Interaction,
+        name: str,
+        message: str,
+        image: discord.Attachment = None,
+    ):
+        try:
+            available = _call_agent_step.list_skill_names()
+            if not available:
+                await interaction.response.send_message(
+                    "❌ No skills are available — enable skills and add at least one "
+                    "to use `/skill`.",
+                    ephemeral=True,
+                )
+                return
+            if name not in available:
+                await interaction.response.send_message(
+                    f"❌ Unknown skill `{name}`. Available: "
+                    + ", ".join(f"`{n}`" for n in available),
+                    ephemeral=True,
+                )
+                return
+
+            await interaction.response.defer(ephemeral=True)
+
+            channel = interaction.channel
+            author = interaction.user
+
+            skill_info = {
+                "author_name": author.display_name,
+                "author_id": author.id,
+                "content": message,
+            }
+            files = [
+                discord.File(
+                    io.BytesIO(json.dumps(skill_info, ensure_ascii=False).encode()),
+                    filename=f"dango_skill_{author.id}.json",
+                )
+            ]
+
+            if image and image.content_type and image.content_type.startswith("image/"):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(image.url) as resp:
+                            if resp.status == 200:
+                                files.append(
+                                    discord.File(
+                                        io.BytesIO(await resp.read()),
+                                        filename=image.filename,
+                                    )
+                                )
+                except Exception as e:
+                    print(f"⚠️ [skill] Failed to re-upload image: {e}")
+
+            sent = await channel.send(
+                content=f"> **[skill: {name}]** **{author.display_name}:** {message}",
+                files=files,
+            )
+
+            channel_name = channel.name if hasattr(channel, "name") else "DM"
+            guild_id = interaction.guild.id if interaction.guild else None
+            guild_name = interaction.guild.name if interaction.guild else ""
+            author_roles = (
+                [r.name for r in author.roles if r.name != "@everyone"]
+                if interaction.guild and isinstance(author, discord.Member)
+                else []
+            )
+
+            message_data = {
+                "content": message,
+                "embeds": [],
+                "author_id": author.id,
+                "author_name": author.display_name,
+                "author_roles": author_roles,
+                "channel_id": channel.id,
+                "channel_name": channel_name,
+                "message_id": sent.id,
+                "bot_user_id": self.bot.user.id,
+                "guild_id": guild_id,
+                "guild_name": guild_name,
+                "timestamp": datetime.now().isoformat(),
+                "created_at": sent.created_at.isoformat(),
+                "is_dm": isinstance(channel, discord.DMChannel),
+                "has_embeds": False,
+                "message_type": "default",
+                "attachments": [
+                    {
+                        "filename": image.filename,
+                        "url": image.url,
+                        "size": image.size,
+                        "content_type": image.content_type or "",
+                    }
+                ] if image and image.content_type and image.content_type.startswith("image/") else [],
+                "_bot": self.bot,
+                "_chat_sys_prompt": self.chat_system_prompt,
+                "_history_limit": self.runtime_config.history_limit,
+                "_timezone": self.runtime_config.timezone,
+                "_force_skill": name,
+            }
+
+            await self.discord_workflow.arun(input=message_data)
+            await interaction.followup.send("✅", ephemeral=True)
+            print(f"✅ [skill] Processed '{name}' request from {author.display_name}")
+
+        except Exception as e:
+            print(f"❌ [skill] Error: {e}")
+            try:
+                await interaction.followup.send(
+                    "Failed to process skill request.", ephemeral=True
+                )
+            except Exception:
+                pass
+
+    @skill_command.autocomplete("name")
+    async def _skill_name_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> list[app_commands.Choice[str]]:
+        cur = current.lower()
+        return [
+            app_commands.Choice(name=n, value=n)
+            for n in _call_agent_step.list_skill_names()
+            if cur in n.lower()
+        ][:25]

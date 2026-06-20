@@ -1,6 +1,6 @@
 ---
-summary: "Full reference for `/newchat`, `/deep`, `/addchannel`, `/sethistorylimit`, `/settimezone`, and all admin commands."
-description: "Full reference for Dango Discord slash commands — reset chat history, force deep model, manage allowed channels and users, set history limit, timezone, and activity status."
+summary: "Full reference for `/newchat`, `/deep`, `/skill`, `/addchannel`, `/sethistorylimit`, `/settimezone`, and all admin commands."
+description: "Full reference for Dango Discord slash commands — reset chat history, force deep model, force a specific skill, manage allowed channels and users, set history limit, timezone, and activity status."
 tags:
   - Usage
   - Slash Commands
@@ -17,6 +17,7 @@ Available to all users.
 |---|---|
 | `/newchat` | Drops a `[new chat]` marker in the channel. The bot ignores all history before this point. |
 | `/deep <message>` | Send a message and force the deep model to respond. Requires `DEEP_MODEL` to be configured. Optionally accepts an image attachment. |
+| `/skill <name> <message>` | Send a message and force a specific skill to be applied to the response. `name` autocompletes from your installed skills. Requires `ENABLE_SKILLS=on` and at least one skill. Optionally accepts an image attachment. |
 
 ## Admin
 

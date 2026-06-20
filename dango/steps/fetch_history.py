@@ -129,12 +129,13 @@ async def _extract_table_attachments(msgs: list) -> dict:
 
 
 async def _extract_deep_attachments(msgs: list) -> dict:
-    """Download dango_deep_*.json attachments → {message_id: deep_info}.
+    """Download dango_deep_*.json / dango_skill_*.json attachments → {message_id: info}.
 
-    deep_info contains: author_name, author_id, content, and optionally
+    info contains: author_name, author_id, content, and optionally
     _images (list[Image]) when an image was re-uploaded alongside the JSON.
-    Used by _process_messages to restore /deep slash command messages
-    as proper user turns in conversation history.
+    Used by _process_messages to restore /deep and /skill slash command
+    messages as proper user turns in conversation history (both post the
+    message as the bot, so without this they'd be misread as bot replies).
     """
     deep_map: dict[int, dict] = {}
     async with aiohttp.ClientSession() as session:
@@ -146,7 +147,7 @@ async def _extract_deep_attachments(msgs: list) -> dict:
             image_attachments = []
 
             for attachment in msg.attachments:
-                if attachment.filename.startswith("dango_deep_") and attachment.filename.endswith(".json"):
+                if attachment.filename.startswith(("dango_deep_", "dango_skill_")) and attachment.filename.endswith(".json"):
                     try:
                         async with session.get(attachment.url) as resp:
                             if resp.status == 200:

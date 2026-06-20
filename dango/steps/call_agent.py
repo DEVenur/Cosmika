@@ -162,7 +162,7 @@ _check_unique_names(_SQL_DATABASES, "SQL_DATABASES_JSON", "db")
 
 def _dynamic_instructions(session_state: dict) -> str:
     """Called by Agno on every arun(); reads per-request context from session_state."""
-    return build_instructions(
+    instructions = build_instructions(
         base_prompt=session_state.get("chat_sys_prompt", ""),
         author_name=session_state.get("author_name", "User"),
         unique_users=set(session_state.get("unique_users", [])),
@@ -170,6 +170,20 @@ def _dynamic_instructions(session_state: dict) -> str:
         history_limit=session_state.get("history_limit"),
         timezone=session_state.get("timezone"),
     )
+    # /skill: when a skill is forced for this turn, hard-inject its full
+    # instructions so the model applies it directly (no get_skill_instructions
+    # round-trip needed). The get_skill_* tools stay available for references.
+    forced = session_state.get("forced_skill")
+    if forced:
+        body = get_forced_skill_instructions(forced)
+        if body:
+            instructions += (
+                f"\n\n---\n\n# Active skill: {forced}\n"
+                "The user explicitly requested this skill. You MUST apply the "
+                "following skill instructions for this response:\n\n"
+                f"{body}"
+            )
+    return instructions
 
 
 # ── Gemini subclass ───────────────────────────────────────────────────────────
@@ -510,6 +524,41 @@ def _make_skills():
     return skills
 
 
+# ── Skills singleton (built once, shared by fast+deep agents and /skill) ───────
+_skills_singleton = None
+_skills_built = False
+
+
+def _get_skills():
+    """Build the Skills bundle once and cache it (None when disabled/empty)."""
+    global _skills_singleton, _skills_built
+    if not _skills_built:
+        _skills_singleton = _make_skills()
+        _skills_built = True
+    return _skills_singleton
+
+
+def list_skill_names() -> list[str]:
+    """Skill names for the /skill autocomplete; [] when disabled or on error."""
+    try:
+        skills = _get_skills()
+        return skills.get_skill_names() if skills else []
+    except Exception:
+        return []
+
+
+def get_forced_skill_instructions(name: str) -> str | None:
+    """Full SKILL.md body for a named skill, or None if disabled/unknown."""
+    try:
+        skills = _get_skills()
+        if not skills:
+            return None
+        skill = skills.get_skill(name)
+        return skill.instructions if skill else None
+    except Exception:
+        return None
+
+
 def _make_agent(model: _DangoGemini | object | str) -> Agent:
     tools = []
     if ENABLE_WORKSPACE:
@@ -549,7 +598,7 @@ def _make_agent(model: _DangoGemini | object | str) -> Agent:
     return Agent(
         model=model,
         tools=tools or None,
-        skills=_make_skills(),
+        skills=_get_skills(),
         instructions=_dynamic_instructions,
         # Time is injected inside _dynamic_instructions (reads runtime_config.timezone each call),
         # so add_datetime_to_context is intentionally off.
@@ -793,6 +842,7 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
         "author_permissions": message_data.get("author_permissions", []),
         "mentioned_users":    message_data.get("mentioned_users", []),
         "mentioned_roles":    message_data.get("mentioned_roles", []),
+        "forced_skill":       message_data.get("_force_skill"),
     }
 
     fallback_name: str | None = None

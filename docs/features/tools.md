@@ -116,6 +116,17 @@ When the user says hello, reply with a warm greeting that matches their language
 
 At runtime the bot gains Agno's built-in `get_skill_instructions`, `get_skill_reference`, and `get_skill_script` tools to pull skill content as needed.
 
+### How a skill gets used
+
+- **Automatically** — the model sees every skill's `name` + `description` in its
+  system prompt and decides on its own to load a skill when a message matches.
+  Users type nothing special; they just phrase their request naturally. Write
+  the `description` like a trigger ("what it does + when to use it") — vague
+  descriptions never fire.
+- **Explicitly with [`/skill`](../usage/commands.md)** — pick a skill from the
+  autocomplete and the bot hard-applies that skill's instructions to the
+  response, no guessing involved.
+
 ::: warning Validation is strict
 A malformed `SKILL.md` (e.g. missing frontmatter) **aborts startup** with a clear error such as `Failed to load skills from '…': SKILL.md must start with YAML frontmatter (---)`. This is intentional — broken skills are never silently dropped. Fix the file or set `ENABLE_SKILLS=off`.
 :::
