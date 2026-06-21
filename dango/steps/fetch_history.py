@@ -77,10 +77,11 @@ async def fetch_and_process_history(step_input: StepInput) -> StepOutput:
         table_content_map = await _extract_table_attachments(msgs)
         deep_map = await _extract_deep_attachments(msgs)
         image_map = await _download_image_attachments(msgs, bot_user_id)
+        sticker_map = await _download_sticker_map(msgs, bot_user_id)
         reply_map, extra_msgs = await _build_reply_map(msgs, channel, bot_user_id)
         mention_map = await _build_mention_map(msgs + extra_msgs)
         formatted_history, unique_users = _process_messages(
-            msgs, bot_user_id, table_content_map, image_map, deep_map, mention_map, reply_map
+            msgs, bot_user_id, table_content_map, image_map, deep_map, mention_map, reply_map, sticker_map
         )
 
         return StepOutput(
@@ -202,6 +203,48 @@ async def _download_image_attachments(msgs: list, bot_user_id: int) -> dict:
     return image_map
 
 
+# Sticker format → image mime type. Lottie (Discord's default packs) is vector
+# JSON, not viewable by vision models, so it is intentionally absent here.
+_STICKER_IMAGE_MIME = {
+    "png":  "image/png",
+    "apng": "image/png",
+    "gif":  "image/gif",
+}
+
+
+async def _download_sticker_map(msgs: list, bot_user_id: int) -> dict:
+    """Download community sticker images from user messages.
+
+    Returns dict[message_id -> {"images": list[Image], "names": list[str]}].
+    Image-format stickers (PNG/APNG/GIF) are downloaded so the model can see
+    them; every sticker's name is kept so Lottie stickers still reach the model
+    as text.
+    """
+    sticker_map: dict[int, dict] = {}
+    async with aiohttp.ClientSession() as session:
+        for msg in msgs:
+            if msg.author.id == bot_user_id or not msg.stickers:
+                continue
+            images: list[Image] = []
+            names: list[str] = []
+            for sticker in msg.stickers:
+                if sticker.name:
+                    names.append(sticker.name)
+                fmt = sticker.format.name.lower() if sticker.format else ""
+                mime = _STICKER_IMAGE_MIME.get(fmt)
+                if not mime:
+                    continue
+                try:
+                    async with session.get(str(sticker.url)) as resp:
+                        if resp.status == 200:
+                            images.append(Image(content=await resp.read(), mime_type=mime))
+                except Exception as e:
+                    print(f"❌ [fetch_and_process_history] Failed to download sticker: {e}")
+            if images or names:
+                sticker_map[msg.id] = {"images": images, "names": names}
+    return sticker_map
+
+
 async def _build_mention_map(msgs: list) -> dict[str, str]:
     """Collect all @user / @role mention tokens in msgs and resolve them to display names.
 
@@ -301,11 +344,13 @@ def _process_messages(
     deep_map: dict | None = None,
     mention_map: dict | None = None,
     reply_map: dict | None = None,
+    sticker_map: dict | None = None,
 ) -> tuple[list[Message], set[str]]:
     """Normalize Discord messages and convert to Agno Message list."""
     deep_map = deep_map or {}
     mention_map = mention_map or {}
     reply_map = reply_map or {}
+    sticker_map = sticker_map or {}
     raw_messages = []
     unique_users: set[str] = set()
 
@@ -342,13 +387,20 @@ def _process_messages(
                     ref_content=ref_content,
                     current_content=content,
                 )
+            images = list(image_map.get(msg.id, []))
+            sticker_info = sticker_map.get(msg.id)
+            if sticker_info:
+                if sticker_info["names"]:
+                    note = f"[sticker: {', '.join(sticker_info['names'])}]"
+                    content = f"{content} {note}" if content else note
+                images.extend(sticker_info["images"])
             raw_messages.append(
                 {
                     "role": "user",
                     "content": content,
                     "author_id": msg.author.id,
                     "author_name": author_name,
-                    "images": image_map.get(msg.id, []),
+                    "images": images,
                 }
             )
 
