@@ -27,30 +27,6 @@
   --vp-button-brand-hover-bg: #9a7dff;
 }
 
-/* Colourful glow around the "Agent" word in the hero title (the word is
-   wrapped at runtime by the theme's setup()). */
-.glow-agent {
-  animation: agent-glow 4s ease-in-out infinite;
-}
-@keyframes agent-glow {
-  0%,
-  100% {
-    text-shadow: 0 0 6px rgba(255, 95, 162, 0.75),
-      0 0 16px rgba(124, 77, 255, 0.6), 0 0 30px rgba(124, 77, 255, 0.35);
-  }
-  50% {
-    text-shadow: 0 0 8px rgba(34, 211, 238, 0.75),
-      0 0 20px rgba(255, 95, 162, 0.6), 0 0 38px rgba(124, 77, 255, 0.45);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .glow-agent {
-    animation: none;
-    text-shadow: 0 0 8px rgba(255, 95, 162, 0.7),
-      0 0 18px rgba(124, 77, 255, 0.55), 0 0 32px rgba(124, 77, 255, 0.35);
-  }
-}
-
 /* Home feature cards: lift + brand border + soft purple shadow on hover. */
 .VPFeature.link {
   transition: border-color 0.25s, background-color 0.25s, transform 0.25s,

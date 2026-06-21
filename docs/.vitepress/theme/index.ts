@@ -21,24 +21,11 @@ export default {
         el.textContent = year
       })
     }
-    // Wrap the trailing "Agent" word of the hero title so CSS can glow it.
-    const glowAgent = () => {
-      const el = document.querySelector('.VPHero .text')
-      if (!el || el.querySelector('.glow-agent')) return
-      el.innerHTML = el.innerHTML.replace(
-        /Agent(?=\s*$)/,
-        '<span class="glow-agent">Agent</span>',
-      )
-    }
-    const enhance = () => {
-      syncYear()
-      glowAgent()
-    }
     const route = useRoute()
     onMounted(() => {
-      enhance()
-      // The footer/hero can appear on pages reached via client-side navigation.
-      watch(() => route.path, () => nextTick(enhance))
+      syncYear()
+      // The footer can appear on pages reached via client-side navigation.
+      watch(() => route.path, () => nextTick(syncYear))
     })
   },
 }
