@@ -81,6 +81,17 @@ def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str,
             }
             for a in message.attachments
         ] if message.attachments else [],
+        # Stickers are separate from attachments in Discord. Community stickers
+        # are PNG/APNG/GIF (viewable); Discord's default packs are Lottie (vector
+        # JSON, name only). call_agent downloads the image formats for the model.
+        "stickers": [
+            {
+                "name": str(s.name),
+                "url": str(s.url),
+                "format": s.format.name if s.format else "",
+            }
+            for s in message.stickers
+        ] if message.stickers else [],
     }
 
 

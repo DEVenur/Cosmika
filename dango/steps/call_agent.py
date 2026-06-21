@@ -768,6 +768,44 @@ async def _download_current_images(attachments: list) -> list[Image]:
     return images
 
 
+# Sticker format → image mime type. Lottie (Discord's default packs) is vector
+# JSON, not viewable by vision models, so it is intentionally absent here.
+_STICKER_IMAGE_MIME = {
+    "png":  "image/png",
+    "apng": "image/png",
+    "gif":  "image/gif",
+}
+
+
+async def _download_current_stickers(stickers: list) -> tuple[list[Image], list[str]]:
+    """Download community sticker images from the current user message.
+
+    Returns (images, names). Image-format stickers (PNG/APNG/GIF) are downloaded
+    so the model can see them; every sticker's name is returned regardless of
+    format so Lottie stickers still reach the model as text.
+    """
+    images: list[Image] = []
+    names: list[str] = []
+    if not stickers:
+        return images, names
+    async with aiohttp.ClientSession() as session:
+        for st in stickers:
+            name = st.get("name", "")
+            if name:
+                names.append(name)
+            mime = _STICKER_IMAGE_MIME.get(st.get("format", "").lower())
+            if not mime:
+                continue
+            try:
+                async with session.get(st["url"]) as resp:
+                    if resp.status == 200:
+                        data = await resp.read()
+                        images.append(Image(content=data, mime_type=mime))
+            except Exception as e:
+                print(f"❌ [call_discord_agent] Failed to download sticker: {e}")
+    return images, names
+
+
 async def call_discord_agent(step_input: StepInput) -> StepOutput:
     """Run the Discord agent with per-request context injected via session_state."""
     _initialize_agents()
@@ -784,8 +822,20 @@ async def call_discord_agent(step_input: StepInput) -> StepOutput:
     _deep: Agent | None = deep_agent
 
     current_content = resolve_mentions(message_data["content"], mention_map)
-    user_content = f"{message_data['author_name']}: {current_content}"
     current_images = await _download_current_images(message_data.get("attachments", []))
+
+    # Stickers: append the downloaded images and note their names in text, so the
+    # model knows the image is a sticker (and still gets the name for Lottie ones).
+    sticker_images, sticker_names = await _download_current_stickers(
+        message_data.get("stickers", [])
+    )
+    if sticker_images:
+        current_images.extend(sticker_images)
+    if sticker_names:
+        note = f"[sticker: {', '.join(sticker_names)}]"
+        current_content = f"{current_content} {note}" if current_content else note
+
+    user_content = f"{message_data['author_name']}: {current_content}"
     messages_to_send = list(data["formatted_history"]) + [
         Message(role="user", content=user_content, images=current_images or None)
     ]
