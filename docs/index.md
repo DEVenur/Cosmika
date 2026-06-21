@@ -27,30 +27,39 @@ features:
   - icon: 🔌
     title: Any AI provider
     details: "provider:model_id auto-configures the SDK and API key — cloud (Gemini, GPT-4o, Claude, Groq) or local (Ollama, LM Studio, vLLM) for fully offline runs."
+    link: /features/models
   - icon: 🔀
     title: Dual-model routing
     details: Pair a fast model for simple messages and a deep model for complex ones; AUTO_ROUTE switches automatically.
+    link: /features/models#dual-model-routing
   - icon: 🖼️
     title: Table rendering
     details: Markdown tables in replies are auto-converted to PNG images (CJK font support included).
+    link: /features/workflow
   - icon: ⚙️
     title: Web dashboard
     details: Browser-based setup wizard and admin UI — no config file editing needed.
+    link: /getting-started/docker
   - icon: ♻️
     title: No restarts
     details: Channels, users, history limit, timezone, and activity are all adjustable live via slash commands.
+    link: /usage/commands
   - icon: 🎓
     title: Skills
     details: Drop a folder with a SKILL.md into skills/ and the bot loads its instructions, scripts, and references on demand — no code needed.
+    link: /features/tools#skills
   - icon: 🛠️
     title: Tools
     details: Web search (DuckDuckGo), URL fetching, workspace file access, custom APIs, SQL databases.
+    link: /features/tools
   - icon: 🧰
     title: Custom commands & tools
     details: Drop Python files in custom/ to add your own slash commands and agent tools — no core changes, loaded on startup.
+    link: /features/extensions
   - icon: 🧩
     title: Embeddable
     details: Drop the Cogs into any existing discord.py bot in a few lines.
+    link: /advanced/embedding
 ---
 
 **Dango** is a free, open-source, self-hosted **Discord AI** bot and agent built on [Agno](https://docs.agno.com). Connect any model provider — Google Gemini, GPT-4o, Claude, Llama, Groq, or local Ollama — and run your own Discord AI chatbot and agent on your server in minutes, with no code changes.

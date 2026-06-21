@@ -26,3 +26,17 @@
   --vp-button-brand-bg: #7c4dff;
   --vp-button-brand-hover-bg: #9a7dff;
 }
+
+/* Home feature cards: lift + brand border + soft purple shadow on hover. */
+.VPFeature.link {
+  transition: border-color 0.25s, background-color 0.25s, transform 0.25s,
+    box-shadow 0.25s;
+}
+.VPFeature.link:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -12px rgba(124, 77, 255, 0.45);
+}
+.VPFeature.link:hover .icon {
+  border-color: var(--vp-c-brand-1);
+}
