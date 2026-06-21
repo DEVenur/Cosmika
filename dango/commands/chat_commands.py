@@ -175,9 +175,10 @@ class ChatCog(commands.Cog):
         self.discord_workflow = discord_workflow
         self.chat_system_prompt = chat_system_prompt
         self.runtime_config = runtime_config
-        # Open message bursts, keyed by (channel_id, author_id). Only used when
-        # ENABLE_MESSAGE_BATCHING is on.
-        self._bursts: dict[tuple[int, int], dict] = {}
+        # Open message bursts, keyed by channel_id. Each channel holds at most one
+        # active burst, owned by whoever opened it; a different speaker flushes it.
+        # Only used when ENABLE_MESSAGE_BATCHING is on.
+        self._bursts: dict[int, dict] = {}
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -205,28 +206,63 @@ class ChatCog(commands.Cog):
             await self._run_workflow_for([message])
             return
 
-        # Batching on: coalesce rapid messages from the same author + channel.
-        key = (message.channel.id, message.author.id)
+        # Batching on. Each channel holds at most one active burst, owned by the
+        # author who opened it.
+        key = message.channel.id
         burst = self._bursts.get(key)
-        if burst is None:
-            # A burst is only opened by a message that would normally respond.
-            if not should_respond:
-                return
-            print(
-                f"⏳ [on_message] Opening burst for {message.author.display_name} "
-                f"(window {MESSAGE_BATCH_WINDOW}s, max {MESSAGE_BATCH_MAX_WAIT}s)"
-            )
-            burst = {"messages": [message], "first_ts": time.monotonic(), "dirty": False}
-            self._bursts[key] = burst
-            burst["task"] = asyncio.create_task(self._debounce_burst(key))
-        else:
-            # While a burst is open, fold in every later message from this author,
-            # even ones that don't mention the bot, and slide the window.
-            print(f"➕ [on_message] Folding message into open burst for {message.author.display_name}")
-            burst["messages"].append(message)
-            burst["dirty"] = True
 
-    async def _debounce_burst(self, key: tuple[int, int]) -> None:
+        if burst is not None:
+            if message.author.id == burst["owner_id"]:
+                # The owner keeps the floor: fold this in and slide the window.
+                # Later messages are folded even without a mention.
+                print(f"➕ [on_message] Folding message into {message.author.display_name}'s burst")
+                burst["messages"].append(message)
+                burst["dirty"] = True
+                return
+            if should_respond:
+                # Another user the bot would answer jumped in: send the owner's
+                # pending reply now, then let the newcomer take the floor below.
+                self._flush_burst(key)
+            else:
+                # Idle chatter from someone else — don't disturb the open burst.
+                return
+
+        if not should_respond:
+            return
+        self._open_burst(key, message)
+
+    def _open_burst(self, key: int, message: discord.Message) -> None:
+        print(
+            f"⏳ [on_message] Opening burst for {message.author.display_name} "
+            f"(window {MESSAGE_BATCH_WINDOW}s, max {MESSAGE_BATCH_MAX_WAIT}s)"
+        )
+        burst = {
+            "owner_id": message.author.id,
+            "messages": [message],
+            "first_ts": time.monotonic(),
+            "dirty": False,
+        }
+        self._bursts[key] = burst
+        burst["task"] = asyncio.create_task(self._debounce_burst(key))
+
+    def _flush_burst(self, key: int) -> None:
+        """Fire an open burst immediately, e.g. when another user takes the floor.
+
+        Cancelling the debounce task and popping the burst here is race-free: the
+        pop is the atomic commit point and _debounce_burst also pops before firing,
+        so whichever runs first owns the burst and the other no-ops.
+        """
+        burst = self._bursts.pop(key, None)
+        if burst is None:
+            return
+        task = burst.get("task")
+        if task is not None:
+            task.cancel()
+        if burst["messages"]:
+            print(f"⚡ [on_message] Flushing burst early ({len(burst['messages'])} msg) — another user spoke")
+            asyncio.create_task(self._run_workflow_for(burst["messages"]))
+
+    async def _debounce_burst(self, key: int) -> None:
         """Wait for the author to stop sending, then fire the burst once.
 
         Sliding window: each new message sets ``dirty`` so we sleep again, capped

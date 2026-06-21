@@ -75,7 +75,7 @@ class TestMergeBurstMessages:
 
 AUTHOR_ID = 111
 CHANNEL_ID = 222
-KEY = (CHANNEL_ID, AUTHOR_ID)
+KEY = CHANNEL_ID  # bursts are keyed by channel
 
 
 class _Typing:
@@ -86,9 +86,9 @@ class _Typing:
         return False
 
 
-def _cog_message(mid: int, content: str):
+def _cog_message(mid: int, content: str, author_id: int = AUTHOR_ID, name: str = "Alice", mentions_bot: bool = False):
     """A discord.Message-like object that survives _build_message_data + the cog path."""
-    author = SimpleNamespace(id=AUTHOR_ID, display_name="Alice", roles=[], guild_permissions=[])
+    author = SimpleNamespace(id=author_id, display_name=name, roles=[], guild_permissions=[])
     channel = SimpleNamespace(id=CHANNEL_ID, name="general", typing=lambda: _Typing())
     return SimpleNamespace(
         author=author,
@@ -103,6 +103,7 @@ def _cog_message(mid: int, content: str):
         role_mentions=[],
         guild=None,
         reference=None,
+        _mentions_bot=mentions_bot,
         created_at=SimpleNamespace(isoformat=lambda: "2026-01-01T00:00:00"),
         type="default",
     )
@@ -143,14 +144,17 @@ def _install_virtual_time(monkeypatch, cc, window, max_wait, on_sleep=None):
     return clock
 
 
-def _make_cog(arun_mock):
+def _make_cog(arun_mock, allowed_channels=None):
     from dango.commands.chat_commands import ChatCog
 
-    bot = SimpleNamespace(user=SimpleNamespace(id=999, mentioned_in=lambda m: False))
+    # In mention mode (allowed_channels empty) should_respond hinges on this.
+    bot = SimpleNamespace(
+        user=SimpleNamespace(id=999, mentioned_in=lambda m: getattr(m, "_mentions_bot", False))
+    )
     workflow = SimpleNamespace(arun=arun_mock)
     runtime = SimpleNamespace(
         allowed_users=set(),
-        allowed_channels={CHANNEL_ID},
+        allowed_channels={CHANNEL_ID} if allowed_channels is None else allowed_channels,
         history_limit=10,
         timezone="UTC",
     )
@@ -159,6 +163,14 @@ def _make_cog(arun_mock):
 
 def _sent_contents(arun_mock):
     return [call.kwargs["input"]["content"] for call in arun_mock.await_args_list]
+
+
+async def _drain():
+    """Wait for every other task on the loop (detached flush/debounce runs)."""
+    me = _real_asyncio.current_task()
+    pending = [t for t in _real_asyncio.all_tasks() if t is not me]
+    if pending:
+        await _real_asyncio.gather(*pending, return_exceptions=True)
 
 
 class TestDebounceBehaviour:
@@ -235,3 +247,48 @@ class TestDebounceBehaviour:
         assert lines[0] == "start"
         # window 1.0 / max_wait 2.5 → folds in the messages from the 3 sleeps before the cap.
         assert lines == ["start", "x1", "x2", "x3"]
+
+    def test_other_speaker_flushes_owner_burst(self, monkeypatch):
+        """Allowed-channel: Bob speaking mid-burst flushes Alice early, then Bob runs."""
+        import dango.commands.chat_commands as cc
+
+        _install_virtual_time(monkeypatch, cc, window=1.0, max_wait=5.0)
+        arun = AsyncMock()
+        cog = _make_cog(arun)  # allowed channel → every message qualifies
+
+        async def scenario():
+            await cog.on_message(_cog_message(1, "alice", author_id=AUTHOR_ID, name="Alice"))
+            # Bob jumps in before Alice's window elapses
+            await cog.on_message(_cog_message(2, "bob", author_id=999111, name="Bob"))
+            await _drain()
+
+        _real_asyncio.run(scenario())
+
+        # Two separate runs: Alice (flushed early) then Bob.
+        assert arun.await_count == 2
+        assert _sent_contents(arun) == ["alice", "bob"]
+
+    def test_idle_chatter_does_not_interrupt_in_mention_mode(self, monkeypatch):
+        """Mention mode: a non-addressed message from another user is ignored,
+        and the owner can keep folding their own follow-ups."""
+        import dango.commands.chat_commands as cc
+
+        _install_virtual_time(monkeypatch, cc, window=1.0, max_wait=5.0)
+        arun = AsyncMock()
+        cog = _make_cog(arun, allowed_channels=set())  # mention mode
+
+        async def scenario():
+            await cog.on_message(_cog_message(1, "alice-1", mentions_bot=True))
+            task = cog._bursts[KEY]["task"]
+            # Carol chats without addressing the bot → must NOT flush Alice
+            await cog.on_message(_cog_message(2, "carol", author_id=999111, name="Carol", mentions_bot=False))
+            # Alice continues her own thought → still folds
+            await cog.on_message(_cog_message(3, "alice-2", mentions_bot=True))
+            await task
+            await _drain()
+
+        _real_asyncio.run(scenario())
+
+        # One run, Carol's chatter excluded from the merged turn.
+        assert arun.await_count == 1
+        assert _sent_contents(arun) == ["alice-1\nalice-2"]
