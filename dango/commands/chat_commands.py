@@ -1,7 +1,10 @@
 """Chat-related Discord Cog"""
 
+import asyncio
 import io
 import json
+import os
+import time
 from datetime import datetime
 from typing import Any
 
@@ -11,14 +14,35 @@ from discord import app_commands
 from discord.ext import commands
 
 from ..steps import call_agent as _call_agent_step
+from ..utils.config_utils import env_onoff_to_bool
 from ..utils.discord_helpers import format_reply_context
 
 
-def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str, Any]:
-    author_id = int(message.author.id)
-    channel_id = int(message.channel.id)
-    message_id = int(message.id)
+# ── Message batching ──────────────────────────────────────────────────────────
+# When on, rapid consecutive messages from the same author in the same channel
+# are coalesced into a single workflow run (Discord-style message grouping).
+# A burst opens on a qualifying message and, while open, folds in every later
+# message from that author. Each new message resets the window (sliding
+# debounce); MAX_WAIT caps how long a single burst can be held.
+ENABLE_MESSAGE_BATCHING = env_onoff_to_bool(os.getenv("ENABLE_MESSAGE_BATCHING"))
 
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        print(f"⚠️ [config] {name}={raw!r} is not a number — using default {default}")
+        return default
+
+
+MESSAGE_BATCH_WINDOW = _env_float("MESSAGE_BATCH_WINDOW", 5.0)
+MESSAGE_BATCH_MAX_WAIT = _env_float("MESSAGE_BATCH_MAX_WAIT", 15.0)
+
+
+def _embed_dicts(message: discord.Message) -> list[dict]:
     embeds = []
     if message.embeds:
         for embed in message.embeds:
@@ -26,6 +50,41 @@ def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str,
                 embeds.append(embed.to_dict())
             except Exception as e:
                 print(f"⚠️ [_build_message_data] Error processing embed: {e}")
+    return embeds
+
+
+def _attachment_dicts(message: discord.Message) -> list[dict]:
+    return [
+        {
+            "filename": str(a.filename),
+            "url": str(a.url),
+            "size": int(a.size),
+            "content_type": str(a.content_type) if a.content_type else "",
+        }
+        for a in message.attachments
+    ] if message.attachments else []
+
+
+def _sticker_dicts(message: discord.Message) -> list[dict]:
+    # Stickers are separate from attachments in Discord. Community stickers
+    # are PNG/APNG/GIF (viewable); Discord's default packs are Lottie (vector
+    # JSON, name only). call_agent downloads the image formats for the model.
+    return [
+        {
+            "name": str(s.name),
+            "url": str(s.url),
+            "format": s.format.name if s.format else "",
+        }
+        for s in message.stickers
+    ] if message.stickers else []
+
+
+def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str, Any]:
+    author_id = int(message.author.id)
+    channel_id = int(message.channel.id)
+    message_id = int(message.id)
+
+    embeds = _embed_dicts(message)
 
     channel_name = ""
     if hasattr(message.channel, "name") and message.channel.name:
@@ -72,27 +131,36 @@ def _build_message_data(message: discord.Message, bot_user_id: int) -> dict[str,
         "is_dm": isinstance(message.channel, discord.DMChannel),
         "has_embeds": len(embeds) > 0,
         "message_type": str(message.type),
-        "attachments": [
-            {
-                "filename": str(a.filename),
-                "url": str(a.url),
-                "size": int(a.size),
-                "content_type": str(a.content_type) if a.content_type else "",
-            }
-            for a in message.attachments
-        ] if message.attachments else [],
-        # Stickers are separate from attachments in Discord. Community stickers
-        # are PNG/APNG/GIF (viewable); Discord's default packs are Lottie (vector
-        # JSON, name only). call_agent downloads the image formats for the model.
-        "stickers": [
-            {
-                "name": str(s.name),
-                "url": str(s.url),
-                "format": s.format.name if s.format else "",
-            }
-            for s in message.stickers
-        ] if message.stickers else [],
+        "attachments": _attachment_dicts(message),
+        "stickers": _sticker_dicts(message),
     }
+
+
+def _merge_burst_messages(
+    messages: list[discord.Message], bot_user_id: int
+) -> dict[str, Any]:
+    """Combine a burst of consecutive messages from one author into one
+    message_data.
+
+    The first message is the carrier — its id/timestamp/reply anchor are used so
+    fetch_history reads the channel *before* the whole burst (no duplication).
+    Later messages contribute their text, attachments and stickers.
+    """
+    data = _build_message_data(messages[0], bot_user_id)
+    if len(messages) == 1:
+        return data
+
+    contents = [data["content"]] if data["content"] else []
+    for m in messages[1:]:
+        extra = str(m.clean_content) if m.clean_content else ""
+        if extra:
+            contents.append(extra)
+        data["attachments"].extend(_attachment_dicts(m))
+        data["stickers"].extend(_sticker_dicts(m))
+        data["embeds"].extend(_embed_dicts(m))
+    data["content"] = "\n".join(contents)
+    data["has_embeds"] = len(data["embeds"]) > 0
+    return data
 
 
 class ChatCog(commands.Cog):
@@ -107,6 +175,9 @@ class ChatCog(commands.Cog):
         self.discord_workflow = discord_workflow
         self.chat_system_prompt = chat_system_prompt
         self.runtime_config = runtime_config
+        # Open message bursts, keyed by (channel_id, author_id). Only used when
+        # ENABLE_MESSAGE_BATCHING is on.
+        self._bursts: dict[tuple[int, int], dict] = {}
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -127,18 +198,71 @@ class ChatCog(commands.Cog):
             not is_dm and (is_mentioned or is_in_allowed_channel)
         )
 
-        if not should_respond:
+        if not ENABLE_MESSAGE_BATCHING:
+            if not should_respond:
+                return
+            print("✅ [on_message] Processing message...")
+            await self._run_workflow_for([message])
             return
 
-        print("✅ [on_message] Processing message...")
+        # Batching on: coalesce rapid messages from the same author + channel.
+        key = (message.channel.id, message.author.id)
+        burst = self._bursts.get(key)
+        if burst is None:
+            # A burst is only opened by a message that would normally respond.
+            if not should_respond:
+                return
+            print(
+                f"⏳ [on_message] Opening burst for {message.author.display_name} "
+                f"(window {MESSAGE_BATCH_WINDOW}s, max {MESSAGE_BATCH_MAX_WAIT}s)"
+            )
+            burst = {"messages": [message], "first_ts": time.monotonic(), "dirty": False}
+            self._bursts[key] = burst
+            burst["task"] = asyncio.create_task(self._debounce_burst(key))
+        else:
+            # While a burst is open, fold in every later message from this author,
+            # even ones that don't mention the bot, and slide the window.
+            print(f"➕ [on_message] Folding message into open burst for {message.author.display_name}")
+            burst["messages"].append(message)
+            burst["dirty"] = True
 
-        async with message.channel.typing():
+    async def _debounce_burst(self, key: tuple[int, int]) -> None:
+        """Wait for the author to stop sending, then fire the burst once.
+
+        Sliding window: each new message sets ``dirty`` so we sleep again, capped
+        by MESSAGE_BATCH_MAX_WAIT measured from the first message.
+        """
+        burst = self._bursts.get(key)
+        if burst is None:
+            return
+        while True:
+            burst["dirty"] = False
+            elapsed = time.monotonic() - burst["first_ts"]
+            remaining = min(MESSAGE_BATCH_WINDOW, MESSAGE_BATCH_MAX_WAIT - elapsed)
+            if remaining <= 0:
+                break
+            await asyncio.sleep(remaining)
+            if not burst["dirty"]:
+                break
+
+        burst = self._bursts.pop(key, None)
+        if not burst or not burst["messages"]:
+            return
+        count = len(burst["messages"])
+        if count > 1:
+            print(f"📦 [on_message] Firing burst: {count} messages merged into one")
+        await self._run_workflow_for(burst["messages"])
+
+    async def _run_workflow_for(self, messages: list[discord.Message]) -> None:
+        """Build merged message_data from a burst and run the workflow once."""
+        carrier = messages[0]
+        async with carrier.channel.typing():
             try:
-                message_data = _build_message_data(message, self.bot.user.id)
+                message_data = _merge_burst_messages(messages, self.bot.user.id)
 
-                if message.reference and message.reference.message_id:
+                if carrier.reference and carrier.reference.message_id:
                     try:
-                        ref_msg = await message.channel.fetch_message(message.reference.message_id)
+                        ref_msg = await carrier.channel.fetch_message(carrier.reference.message_id)
                         if ref_msg.content:
                             message_data["content"] = format_reply_context(
                                 current_author=message_data["author_name"],
@@ -163,7 +287,7 @@ class ChatCog(commands.Cog):
                 import traceback
                 traceback.print_exc()
                 try:
-                    await message.channel.send(
+                    await carrier.channel.send(
                         f"Sorry, an error occurred while processing your message. Error: {e}"
                     )
                 except Exception as send_error:

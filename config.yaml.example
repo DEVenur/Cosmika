@@ -31,6 +31,9 @@ fallback_on_error: false # retry on the other model when one errors (needs deep_
 # ── Bot behaviour ─────────────────────────────────────────────────────────────
 chat_sys_prompt: "You are Dango, a helpful AI assistant on this Discord server. Always be polite and positive in your responses."
 enable_contextual_system_prompt: true  # address users by name, inject time/participants
+enable_message_batching: false  # merge rapid consecutive messages from one person into one reply
+message_batch_window: 5         # seconds to wait for the next message (each new message resets it)
+message_batch_max_wait: 15      # hard cap (seconds) on how long one burst is held
 
 # ── Workspace (read-only access to a local folder) ────────────────────────────
 enable_workspace: false

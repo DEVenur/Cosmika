@@ -33,6 +33,9 @@ class BotConfig(BaseModel):
         "Always be polite and positive in your responses."
     )
     enable_contextual_system_prompt: bool = True
+    enable_message_batching: bool = False
+    message_batch_window: float = 5
+    message_batch_max_wait: float = 15
 
     # ── Workspace ────────────────────────────────────────────────────────────
     enable_workspace: bool = False

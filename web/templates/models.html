@@ -373,6 +373,32 @@
               {% if config.enable_contextual_system_prompt %}checked{% endif %} />
           </div>
 
+          <div class="px-4 py-3" x-data="{ batching: {% if config.enable_message_batching %}true{% else %}false{% endif %} }">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium">Message Batching</p>
+                <p class="text-xs text-base-content/45">Merge rapid consecutive messages from the same person into one reply (Discord-style grouping)</p>
+              </div>
+              <input type="checkbox" name="enable_message_batching" value="on" x-model="batching"
+                class="toggle toggle-primary toggle-sm"
+                {% if config.enable_message_batching %}checked{% endif %} />
+            </div>
+            <div class="mt-2 grid grid-cols-2 gap-2" x-show="batching">
+              <label class="text-xs text-base-content/60">
+                Window (seconds)
+                <input name="message_batch_window" type="number" min="0" step="0.5"
+                  value="{{ config.message_batch_window }}"
+                  class="input input-bordered input-sm font-mono w-full mt-1" />
+              </label>
+              <label class="text-xs text-base-content/60">
+                Max wait (seconds)
+                <input name="message_batch_max_wait" type="number" min="0" step="0.5"
+                  value="{{ config.message_batch_max_wait }}"
+                  class="input input-bordered input-sm font-mono w-full mt-1" />
+              </label>
+            </div>
+          </div>
+
           <div class="flex justify-between items-center px-4 py-3">
             <div>
               <p class="text-sm font-medium">DuckDuckGo Search</p>

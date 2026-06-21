@@ -71,6 +71,9 @@ When the bot runs in Docker and the model server runs on the host, use `host.doc
 |---|---|---|
 | `ENABLE_CONTEXTUAL_SYSTEM_PROMPT` | `on` | **`on`/`off`** — inject user display names and current time into the system prompt |
 | `CONTEXT_TOKEN_BUDGET` | `0` | Max input tokens per request; oldest messages are dropped when exceeded. `0` = no limit. |
+| `ENABLE_MESSAGE_BATCHING` | `off` | **`on`/`off`** — merge rapid consecutive messages from the same person into one reply (Discord-style grouping) |
+| `MESSAGE_BATCH_WINDOW` | `5` | Seconds to wait for the next message before replying; each new message resets the window |
+| `MESSAGE_BATCH_MAX_WAIT` | `15` | Hard cap (seconds) on how long one burst is held, measured from its first message |
 
 ## Web search & browsing
 

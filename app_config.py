@@ -46,6 +46,9 @@ def inject_config_to_env() -> str | None:
 
     # ── Bot behaviour ─────────────────────────────────────────────────────────
     _set("ENABLE_CONTEXTUAL_SYSTEM_PROMPT", _onoff(cfg.get("enable_contextual_system_prompt", True)))
+    _set("ENABLE_MESSAGE_BATCHING", _onoff(cfg.get("enable_message_batching", False)))
+    _set("MESSAGE_BATCH_WINDOW",   cfg.get("message_batch_window", 5))
+    _set("MESSAGE_BATCH_MAX_WAIT", cfg.get("message_batch_max_wait", 15))
 
     # ── Workspace ────────────────────────────────────────────────────────────
     _set("ENABLE_WORKSPACE",    _onoff(cfg.get("enable_workspace", False)))

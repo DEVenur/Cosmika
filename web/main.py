@@ -433,6 +433,9 @@ async def save_features(
     auto_route: str = Form("off"),
     fallback_on_error: str = Form("off"),
     enable_contextual_system_prompt: str = Form("off"),
+    enable_message_batching: str = Form("off"),
+    message_batch_window: str = Form(""),
+    message_batch_max_wait: str = Form(""),
     enable_duckduckgo: str = Form("off"),
     enable_brave_search: str = Form("off"),
     brave_api_key: str = Form(""),
@@ -442,6 +445,11 @@ async def save_features(
     config.auto_route = auto_route == "on"
     config.fallback_on_error = fallback_on_error == "on"
     config.enable_contextual_system_prompt = enable_contextual_system_prompt == "on"
+    config.enable_message_batching = enable_message_batching == "on"
+    if message_batch_window.strip():
+        config.message_batch_window = float(message_batch_window)
+    if message_batch_max_wait.strip():
+        config.message_batch_max_wait = float(message_batch_max_wait)
     config.enable_duckduckgo = enable_duckduckgo == "on"
     config.enable_brave_search = enable_brave_search == "on"
     if brave_api_key.strip():
