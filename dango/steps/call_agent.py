@@ -437,6 +437,19 @@ def _make_api_tool(name: str, base_url: str, api_key: str, description: str = ""
     async def _fn(endpoint: str = "", method: str = "GET",
                   params: dict | None = None, json_body: dict | None = None,
                   extra_headers: dict | None = None) -> str:
+        """
+        Args:
+            endpoint: The full path AND query string already built, e.g.
+                "search?q=foo&limit=5". Never split the query into separate
+                arguments — this is the only place it goes.
+            method: HTTP method, usually "GET". Only change it if the API
+                description above explicitly says otherwise.
+            params: Leave as null/None unless the API description above
+                explicitly asks for it — most of these APIs want everything
+                inside `endpoint` instead.
+            json_body: Request body for POST/PUT, only if the API needs one.
+            extra_headers: Extra HTTP headers, only if the API needs them.
+        """
         url = f"{base}/{endpoint.lstrip('/')}" if endpoint else base
         headers: dict = {}
         if api_key:
@@ -451,7 +464,11 @@ def _make_api_tool(name: str, base_url: str, api_key: str, description: str = ""
 
     base_desc = (
         f"Make an HTTP request to the {name} API (base URL: {base_url}). "
-        "Auth is pre-configured. Leave endpoint empty to hit the base URL directly."
+        "Auth is pre-configured. Build the full path and query string into "
+        "`endpoint` (e.g. endpoint='search?q=foo&limit=5') — never invent "
+        "separate arguments like `query` or `limit`. Leave `params` as null "
+        "unless the API description explicitly says otherwise. Leave "
+        "`endpoint` empty to hit the base URL directly."
     )
     desc = f"{description} {base_desc}" if description else base_desc
     return tool(name=tool_name, description=desc)(_fn)
