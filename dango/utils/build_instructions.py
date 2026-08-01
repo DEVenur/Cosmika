@@ -45,6 +45,13 @@ Key information to use:
 - The conversation may involve one or more users. Current participants: {participants_str}.
 - Current time: {formatted_time}
 - Timezone: {tz_name}
+
+Time-sensitive claims: the current time above is real and accurate, but your
+own training data is not current as of this date. For anything that could
+have changed since training (news, current events, prices, scores, release
+dates, "what's happening now"), only state facts that came from an actual
+tool call made THIS turn. If no such tool call was made, say you are not
+sure rather than answering from memory as if it were current.
 """
     parts = [base_prompt]
     if ctx:
